@@ -1,0 +1,17 @@
+{
+  "name": "midinator",
+  "version": "0.0.1",
+  "description": "midi video generator",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "start:watch": "nodemon --watch *.js --watch **/*.js --watch *.html --watch *.css --exec 'electron .'"
+  },
+  "devDependencies": {
+    "electron": "^4.1.1",
+    "nodemon": "^1.18.10"
+  },
+  "dependencies": {
+    "midi-player-js": "^2.0.5"
+  }
+}
