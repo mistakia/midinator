@@ -11,10 +11,10 @@ const { dialog, getCurrentWindow } = require('electron').remote
 const win = getCurrentWindow()
 
 let PROGRAMS = require('./src/programs')
+const { setCanvas } = require('./src/utils')
+const { drawTimeline } = require('./src/draw')
 
-let MEASURE_LENGTH
 let Player
-
 let Project = {}
 
 const timeline = document.getElementById('timeline')
@@ -24,97 +24,6 @@ canvas.height = 200
 
 const ctx = canvas.getContext('2d')
 const listen = (event) => console.log(event)
-
-const clearNoteActive = () => {
-  const noteElems = document.querySelectorAll('.note')
-  noteElems.forEach((elem) => elem.className = 'note')
-}
-
-const clearProgramActive = () => {
-  const programElems = document.querySelectorAll('.program-item')
-  programElems.forEach((elem) => elem.className = 'program-item')
-}
-
-const setCanvas = () => {
-  canvas.width = canvas.width
-  ctx.fillStyle = '#000'
-  ctx.fillRect(0, 0, 600, 100)
-}
-
-const drawProgramList = (programs) => {
-  const programListElem = document.getElementById('program-list')
-  programListElem.innerHTML = ''
-
-  programs.forEach((p) => {
-    const programElem = document.createElement('div')
-    programElem.className = 'program-item'
-    const select = document.createElement('select')
-    Object.keys(PROGRAMS).forEach((name) => {
-      const option = document.createElement('option')
-      option.text = name
-      select.add(option)
-    })
-    programElem.addEventListener('click', (event) => {
-      clearProgramActive()
-      programElem.className += ' active'
-
-      const programName = select.value
-      const paramElem = PROGRAMS[programName].renderParams({ params: p.params, document } )
-      const programParamElem = document.getElementById('program-params')
-      programParamElem.innerHTML = ''
-      programParamElem.appendChild(paramElem)
-    })
-    programElem.appendChild(select)
-    programListElem.appendChild(programElem)
-  })
-
-  const addProgramElem = document.createElement('div')
-  addProgramElem.className = 'program-item'
-  addProgramElem.innerHTML = 'Add Program'
-  addProgramElem.addEventListener('click', (event) => {
-    const firstProgram = Object.keys(PROGRAMS)[0]
-    programs.push({ name: firstProgram, params: {} })
-    drawProgramList(programs)
-  })
-  programListElem.appendChild(addProgramElem)
-}
-
-const loadNote = (event) => {
-  clearNoteActive()
-  event.target.className += ' active'
-  const eventIndex = event.target.dataset.eventIndex
-  const midiEvent = Project.midiEvents[eventIndex]
-  console.log(midiEvent)
-
-  let { programs } = midiEvent
-  drawProgramList(programs)
-}
-
-const drawTimeline = () => {
-  timeline.innerHTML = '' //clear timeline
-
-  const totalTicks = Player.totalTicks
-  MEASURE_LENGTH = Player.division * 4
-  const totalMeasures = Math.ceil(totalTicks / MEASURE_LENGTH)
-  console.log(`Total ticks: ${totalTicks}`)
-  console.log(`Division: ${Player.division}`)
-  console.log(`Tempo: ${Player.tempo}`)
-  console.log(`Measures: ${totalMeasures}`)
-
-  for (let i=0; i<totalMeasures;i++) {
-    drawMeasure()
-  }
-
-  for (let i=0; i < Project.midiEvents.length; i++) {
-    const event = Project.midiEvents[i]
-    if (event.name !== 'Note on') continue
-    event.programs = event.programs || []
-    drawNote(event, i)
-  }
-
-  const noteElems = document.querySelectorAll('.note')
-  noteElems.forEach((elem) => elem.addEventListener('click', loadNote))
-}
 
 const loadMidi = () => {
   dialog.showOpenDialog({
@@ -131,28 +40,9 @@ const loadMidi = () => {
       Player.loadFile(Project.midiFile)
 
       Project.midiEvents = Player.getEvents()[0]
-      drawTimeline()
+      drawTimeline({ Player, Project })
     }
   })
-}
-
-const drawMeasure = () => {
-  const elem = document.createElement('div')
-  elem.className = 'measure'
-  timeline.appendChild(elem)
-}
-
-const drawNote = (event, eventIndex) => {
-  const elem = document.createElement('div')
-  elem.className = 'note'
-
-  const measureNumber = Math.floor(event.tick / MEASURE_LENGTH) + 1
-
-  const parent = document.querySelector(`.measure:nth-child(${measureNumber})`)
-  const position = ((event.tick % MEASURE_LENGTH) / MEASURE_LENGTH) * 100
-  elem.setAttribute('style', `left: ${position}%;`)
-  elem.dataset.eventIndex = eventIndex
-  parent.appendChild(elem)
 }
 
 const play = () => {
@@ -299,7 +189,7 @@ const loadJSON = () => {
       Player = new MidiPlayer.Player(listen)
       Player.on('fileLoaded', () => {
         Player.events[0] = Project.midiEvents
-        drawTimeline()
+        drawTimeline({ Player, Project })
       })
       Player.loadFile(Project.midiFile)
     }
