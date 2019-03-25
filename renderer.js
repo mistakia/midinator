@@ -56,6 +56,7 @@ const play = () => {
   const animate = () => {
     if (Player.isPlaying()) window.requestAnimationFrame(animate)
     if (!currentEvent) return
+    if (currentEvent.name !== 'Note on') return
 
     setCanvas()
     const delta = currentTick - currentEvent.tick
@@ -187,6 +188,7 @@ const loadJSON = () => {
       Project = jsonfile.readFileSync(file)
       Player = new MidiPlayer.Player(listen)
       Player.on('fileLoaded', () => {
+        Player.tracks[0].events = Project.midiEvents
         Player.events[0] = Project.midiEvents
         drawTimeline({ Player, Project })
       })

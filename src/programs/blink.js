@@ -6,7 +6,7 @@ const run = ({ canvas, ctx, delta, color, length }) => {
   const opacity = 1 - (delta / length)
   if (opacity <= 0) return
   ctx.fillStyle = `rgba(${color},${opacity})`
-  ctx.fillRect(0,0, 600, 100)
+  ctx.fillRect(0,0, 600, 200)
 }
 
 const renderParams = ({ params, document }) => {
