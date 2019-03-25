@@ -7,12 +7,31 @@
 
   </head>
   <body>
-    <div class='divider'>Output</div>
-    <canvas id='canvas'></canvas>
-    <div class='divider'>Timeline</div>
-    <button id='load'>Load Midi</button>
-    <button id='play'>Play</button>
-    <section id='timeline'></section>
+    <main>
+      <section id='output-section'>
+        <div class='divider'>Output</div>
+        <canvas id='canvas'></canvas>
+      </section>
+      <section id='timeline-section'>
+        <div class='divider'>Timeline</div>
+        <section id='timeline-controls'>
+          <progress id='progress' value='0' max='100'></progress>
+          <button id='loadMidi'>Load Midi</button>
+          <button id='play'>Play</button>
+          <button id='make'>Make</button>
+          <button id='save'>Save JSON</button>
+          <button id='loadJSON'>Load JSON</button>
+        </section>
+        <section id='timeline-container'>
+          <section id='timeline'></section>
+        </section>
+      </section>
+      <section id='program-section'>
+        <div class='divider'>Program</div>
+        <section id='program-list'></section>
+        <section id='program-params'></section>
+      </section>
+    </main>
     <script>
       // You can also require other files to run in this process
       require('./renderer.js')

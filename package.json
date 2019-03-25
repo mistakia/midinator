@@ -5,13 +5,18 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "start:watch": "nodemon --watch *.js --watch **/*.js --watch *.html --watch *.css --exec 'electron .'"
+    "start:watch": "nodemon --watch 'main.js' --watch 'renderer.js' --watch './src/**/*.js' --watch *.html --watch *.css --exec 'electron .'"
   },
   "devDependencies": {
     "electron": "^4.1.1",
     "nodemon": "^1.18.10"
   },
   "dependencies": {
-    "midi-player-js": "^2.0.5"
+    "canvas-to-buffer": "^1.0.14",
+    "fluent-ffmpeg": "^2.1.2",
+    "jsonfile": "^5.0.0",
+    "leftpad": "0.0.1",
+    "midi-player-js": "^2.0.5",
+    "rimraf": "^2.6.3"
   }
 }
