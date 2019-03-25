@@ -22,7 +22,6 @@ const canvas = document.getElementById('canvas')
 setCanvas()
 
 const ctx = canvas.getContext('2d')
-const listen = (event) => console.log(event)
 
 const loadMidi = () => {
   dialog.showOpenDialog({
@@ -35,7 +34,7 @@ const loadMidi = () => {
   }, function (files) {
     if (files !== undefined) {
       Project.midiFile = files[0]
-      Player = new MidiPlayer.Player(listen)
+      Player = new MidiPlayer.Player()
       Player.loadFile(Project.midiFile)
 
       Project.midiEvents = Player.getEvents()[0]
@@ -48,13 +47,26 @@ const play = () => {
   if (!Player) return
   if (Player.isPlaying()) {
     Player.stop()
+    const elem = document.getElementById('current-position')
+    if (elem.parentNode) elem.parentNode.removeChild(elem)
     return document.querySelector('#play').innerHTML = 'Play'
   }
 
   let currentEvent
   let currentTick = 0
+  const currentPosition = document.createElement('div')
+  currentPosition.id = 'current-position'
   const animate = () => {
     if (Player.isPlaying()) window.requestAnimationFrame(animate)
+
+    if (currentPosition.parentNode) currentPosition.parentNode.removeChild(currentPosition)
+    const measureLength = Player.division * 4
+    const currentMeasure = Math.ceil(currentTick / measureLength)
+    const parent = document.querySelector(`.measure:nth-child(${currentMeasure})`)
+    const position = ((currentTick % measureLength) / measureLength) * 100
+    currentPosition.setAttribute('style', `left: ${position}%;`)
+    if (parent && Player.isPlaying()) parent.appendChild(currentPosition)
+
     if (!currentEvent) return
     if (currentEvent.name !== 'Note on') return
 
@@ -186,7 +198,7 @@ const loadJSON = () => {
     if (files !== undefined) {
       const file = files[0]
       Project = jsonfile.readFileSync(file)
-      Player = new MidiPlayer.Player(listen)
+      Player = new MidiPlayer.Player()
       Player.on('fileLoaded', () => {
         Player.tracks[0].events = Project.midiEvents
         Player.events[0] = Project.midiEvents
