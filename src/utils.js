@@ -1,6 +1,3 @@
-const canvas = document.getElementById('canvas')
-const ctx = canvas.getContext('2d')
-
 const clearNoteActive = () => {
   const noteElems = document.querySelectorAll('.note')
   noteElems.forEach((elem) => elem.className = 'note')
@@ -16,7 +13,7 @@ const clearProgramParams = () => {
   programParams.innerHTML = ''
 }
 
-const setCanvas = () => {
+const setCanvas = (canvas, ctx) => {
   canvas.width = 600
   canvas.height = 200
   ctx.fillStyle = '#000'

@@ -6,6 +6,21 @@ const {
   clearProgramParams
 } = require('./utils')
 
+const drawColumnParams = (program, parent) => {
+  const { columns } = program
+  const label = document.createElement('label')
+  label.innerHTML = 'Columns:'
+  const input = document.createElement('input')
+  input.value = columns.length ? columns.toString() : ''
+  input.oninput = () => {
+    const values = JSON.parse('[' + input.value + ']')
+    //TODO: validate
+    program.columns = values
+  }
+  parent.appendChild(label)
+  parent.appendChild(input)
+}
+
 const drawProgramList = (programs) => {
   const programListElem = document.getElementById('program-list')
   programListElem.innerHTML = ''
@@ -24,7 +39,8 @@ const drawProgramList = (programs) => {
       programElem.className += ' active'
 
       const programName = select.value
-      const paramElem = PROGRAMS[programName].renderParams({ params: p.params, document } )
+      const paramElem = PROGRAMS[programName].renderParams({ params: p.params } )
+      drawColumnParams(p, paramElem)
       const programParamElem = document.getElementById('program-params')
       programParamElem.innerHTML = ''
       programParamElem.appendChild(paramElem)
@@ -38,7 +54,7 @@ const drawProgramList = (programs) => {
   addProgramElem.innerHTML = 'Add Program'
   addProgramElem.addEventListener('click', (event) => {
     const firstProgram = Object.keys(PROGRAMS)[0]
-    programs.push({ name: firstProgram, params: {} })
+    programs.push({ name: firstProgram, params: {}, columns: [] })
     drawProgramList(programs)
   })
   programListElem.appendChild(addProgramElem)

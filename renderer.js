@@ -19,9 +19,8 @@ let Project = {}
 
 const timeline = document.getElementById('timeline')
 const canvas = document.getElementById('canvas')
-setCanvas()
-
 const ctx = canvas.getContext('2d')
+setCanvas(canvas, ctx)
 
 const loadMidi = () => {
   dialog.showOpenDialog({
@@ -70,11 +69,27 @@ const play = () => {
     if (!currentEvent) return
     if (currentEvent.name !== 'Note on') return
 
-    setCanvas()
+    setCanvas(canvas, ctx)
     const delta = currentTick - currentEvent.tick
     const { programs } = currentEvent
     if (programs.length) {
-      programs.forEach((p) => PROGRAMS[p.name].run({ canvas, ctx, delta, ...p.params }))
+      programs.forEach((p) => {
+        const cnvs = PROGRAMS[p.name].run({ delta, ...p.params })
+        if (!p.columns.length) return ctx.drawImage(cnvs, 0, 0)
+        for (let i=0; i<program.columns.length; i++) {
+          const column = program.columns[i]
+          const sx = (column * 100) - 100
+          const sy = 0
+          const columnWidth = 100
+          const columnHeight = 200
+          const dx = sx
+          const dy = sy
+          ctx.drawImage(
+            cnvs, sx, sy, columnWidth, columnHeight,
+            dx, dy, columnWidth, columnHeight
+          )
+        }
+      })
     }
   }
 
@@ -101,7 +116,6 @@ const showMakeDialog = () => {
 }
 
 const make = (outputPath) => {
-
   console.log('clearing frames')
   rimraf.sync('tmp/*')
 
@@ -116,10 +130,25 @@ const make = (outputPath) => {
     let start = midiEvent.tick
     const end = nextEvent ? nextEvent.tick : Player.totalTicks
     for (;start < end; start++) {
-      setCanvas()
+      setCanvas(canvas, ctx)
       const delta = start - midiEvent.tick
       midiEvent.programs.forEach((program) => {
-        PROGRAMS[program.name].run({ canvas, ctx, delta, ...program.params })
+        const cnvs = PROGRAMS[program.name].run({ delta, ...program.params })
+
+        if (!program.columns.length) return ctx.drawImage(cnvs, 0, 0)
+        for (let i=0; i<program.columns.length; i++) {
+          const column = program.columns[i]
+          const sx = (column * 100) - 100
+          const sy = 0
+          const columnWidth = 100
+          const columnHeight = 200
+          const dx = sx
+          const dy = sy
+          ctx.drawImage(
+            cnvs, sx, sy, columnWidth, columnHeight,
+            dx, dy, columnWidth, columnHeight
+          )
+        }
       })
 
       createdFrames[start] = true
@@ -128,7 +157,7 @@ const make = (outputPath) => {
     }
   }
 
-  setCanvas()
+  setCanvas(canvas, ctx)
   console.log('filling in background')
   let i=0
   const progressElem = document.getElementById('progress')
@@ -167,6 +196,7 @@ const runFFmpeg = (outputPath) => {
       console.log('Finished processing')
     })
     .on('error', function(err, stdout, stderr) {
+      alert(`Error: ${err.message}`)
       console.log('Cannot process video: ' + err.message)
     })
     .run()

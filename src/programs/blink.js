@@ -1,15 +1,24 @@
-const run = ({ canvas, ctx, delta, color, length }) => {
+const canvas = document.createElement('canvas')
+const ctx = canvas.getContext('2d')
+
+const { setCanvas } = require('../utils')
+
+const run = ({ delta, color, length }) => {
+  setCanvas(canvas, ctx)
+
   //TODO: validate params
   color = color || '255,255,255'
   length = length || 10
 
   const opacity = 1 - (delta / length)
-  if (opacity <= 0) return
+  if (opacity <= 0) return canvas
   ctx.fillStyle = `rgba(${color},${opacity})`
   ctx.fillRect(0,0, 600, 200)
+
+  return canvas
 }
 
-const renderParams = ({ params, document }) => {
+const renderParams = ({ params }) => {
   const container = document.createElement('div')
   const colorLabel = document.createElement('label')
   colorLabel.innerHTML = 'Color:'
