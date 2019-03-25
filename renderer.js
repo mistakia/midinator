@@ -102,7 +102,7 @@ const play = () => {
   window.requestAnimationFrame(animate)
 }
 
-const showMakeDialog = () => {
+const showExportDialog = () => {
   dialog.showSaveDialog({
     title: 'Save Video File',
     defaultPath: '~/Downloads/output',
@@ -111,11 +111,11 @@ const showMakeDialog = () => {
       { name: 'Video', extensions: ['mp4'] }
     ]
   }, function (file) {
-    if (file) make(file)
+    if (file) exportVideo(file)
   })
 }
 
-const make = (outputPath) => {
+const exportVideo = (outputPath) => {
   console.log('clearing frames')
   rimraf.sync('tmp/*')
 
@@ -162,7 +162,7 @@ const make = (outputPath) => {
   let i=0
   const progressElem = document.getElementById('progress')
 
-  const makeBackgroundFrame = () => {
+  const renderBackgroundFrame = () => {
     i += 1
     if (!createdFrames[i]) {
       const frame = new Frame(canvas, { quality: 1, image: { types: ['png'] }})
@@ -173,12 +173,12 @@ const make = (outputPath) => {
 
       if (progressElem.value != percent) {
         progressElem.value = parseInt(percent, 10)
-        setTimeout(() => makeBackgroundFrame(), 30)
-      } else makeBackgroundFrame()
+        setTimeout(() => renderBackgroundFrame(), 30)
+      } else renderBackgroundFrame()
     } else runFFmpeg(outputPath)
   }
 
-  makeBackgroundFrame()
+  renderBackgroundFrame()
 }
 
 const runFFmpeg = (outputPath) => {
@@ -243,4 +243,4 @@ document.querySelector('#play').addEventListener('click', play)
 document.querySelector('#loadMidi').addEventListener('click', loadMidi)
 document.querySelector('#loadJSON').addEventListener('click', loadJSON)
 document.querySelector('#save').addEventListener('click', save)
-document.querySelector('#make').addEventListener('click', showMakeDialog)
+document.querySelector('#export').addEventListener('click', showExportDialog)

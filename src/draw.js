@@ -60,9 +60,10 @@ const drawProgramList = (programs) => {
   programListElem.appendChild(addProgramElem)
 }
 
-const drawMeasure = () => {
+const drawMeasure = (measureNumber) => {
   const elem = document.createElement('div')
   elem.className = 'measure'
+  elem.dataset.measureNumber = measureNumber
   timeline.appendChild(elem)
 }
 
@@ -101,8 +102,8 @@ const drawTimeline = ({ Player, Project }) => {
     drawProgramList(programs)
   }
 
-  for (let i=0; i<totalMeasures;i++) {
-    drawMeasure()
+  for (let i=1; i<=totalMeasures;i++) {
+    drawMeasure(i)
   }
 
   for (let i=0; i < Project.midiEvents.length; i++) {
