@@ -45,12 +45,21 @@ main > section {
 progress {
     flex: 0 0 auto;
     width: 100px;
-    background-color: #ccc;
     height: 4px;
     margin-right: 10px;
 }
 
 progress[value] {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+progress[value]::-webkit-progress-bar {
+    background-color: white;
+    border: 1px solid #ccc;
+}
+
+progress[value]::-webkit-progress-value {
     background-color: red;
 }
 
@@ -70,7 +79,9 @@ progress[value] {
 
 #canvas {
     position: relative;
-    margin-top: 10px;
+    width: 600px;
+    display: block;
+    margin: 0 auto;
 }
 
 .divider {

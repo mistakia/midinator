@@ -17,9 +17,10 @@ const clearProgramParams = () => {
 }
 
 const setCanvas = () => {
-  canvas.width = canvas.width
+  canvas.width = 600
+  canvas.height = 200
   ctx.fillStyle = '#000'
-  ctx.fillRect(0, 0, 600, 100)
+  ctx.fillRect(0, 0, 600, 200)
 }
 
 module.exports = {

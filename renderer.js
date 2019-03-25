@@ -19,8 +19,7 @@ let Project = {}
 
 const timeline = document.getElementById('timeline')
 const canvas = document.getElementById('canvas')
-canvas.width = win.getSize()[0]
-canvas.height = 200
+setCanvas()
 
 const ctx = canvas.getContext('2d')
 const listen = (event) => console.log(event)
