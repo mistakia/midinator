@@ -1,5 +1,71 @@
-body {
+html, body {
     margin: 0;
+    height: 100%;
+}
+
+main {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+main > section {
+    position: relative;
+    padding-top: 18px;
+}
+
+#output-section {
+    flex: 0 0 auto;
+    height: 200px;
+    width: 100%;
+}
+
+#timeline-section {
+    flex: 1 1 auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#timeline-controls {
+    flex: 0 0 auto;
+    height: 30px;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+}
+
+#timeline-controls > button {
+    flex: 0 0 auto;
+}
+
+progress {
+    flex: 0 0 auto;
+    width: 100px;
+    background-color: #ccc;
+    height: 4px;
+    margin-right: 10px;
+}
+
+progress[value] {
+    background-color: red;
+}
+
+#timeline-container {
+    flex: 1 1 auto;
+    overflow: hidden;
+    overflow-y: scroll;
+}
+
+#program-section {
+    flex: 0 0 auto;
+    width: 100%;
+    height: 150px;
+    display: flex;
+    align-content: stretch;
 }
 
 #canvas {
@@ -8,9 +74,13 @@ body {
 }
 
 .divider {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 96%;
     height: 10px;
     background-color: #f0f0f0;
+    border-top: 1px solid #ccc;
     display: block;
     font-size: 10px;
     padding: 4px 2%;
@@ -46,4 +116,41 @@ body {
     bottom: 0;
     background-color: #000;
     width: 4px;
+    cursor: pointer;
+}
+
+.note:hover {
+    background-color: yellow;
+}
+
+.note.active {
+    background-color: green;
+}
+
+#program-list {
+    flex: 1 0 auto;
+    position: relative;
+}
+
+#program-params {
+    flex: 2 0 auto;
+    position: relative;
+    background: #fafafa;
+    padding: 15px;
+}
+
+.program-item {
+    display: block;
+    font-size: 10px;
+    padding: 4px 10px;
+    border-bottom: 1px solid #fafafa;
+    cursor: pointer;
+}
+
+.program-item:hover {
+    background: rgba(255,165,0,0.5);
+}
+
+.program-item.active {
+    background: #fafafa;
 }
