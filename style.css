@@ -149,6 +149,7 @@ progress[value]::-webkit-progress-value {
     flex: 2 0 auto;
     position: relative;
     background: #fafafa;
+    max-width: 66%;
     padding: 15px;
 }
 
@@ -158,11 +159,12 @@ progress[value]::-webkit-progress-value {
 }
 
 .program-item {
-    display: block;
+    display: flex;
     font-size: 10px;
     padding: 4px 10px;
     border-bottom: 1px solid #fafafa;
     cursor: pointer;
+    position: relative;
 }
 
 .program-item:hover {
@@ -173,10 +175,49 @@ progress[value]::-webkit-progress-value {
     background: #fafafa;
 }
 
+.program-item select {
+    flex: 3 1 auto;
+    max-width: 50%;
+}
+
+.program-item .close {
+    flex: 0 1 auto;
+    width: 25px;
+}
+
 #current-position {
     position: absolute;
     top: 0;
     bottom: 0;
     background-color: #FF0000;
     width: 2px;
+}
+
+/****************** close ******************/
+
+.close {
+  position: relative;
+  opacity: 0.3;
+}
+
+.close:hover {
+  opacity: 1;
+}
+
+.close:before, .close:after {
+  position: absolute;
+  left: 10px;
+  top: 1px;
+  content: ' ';
+  height: 15px;
+  width: 2px;
+  background-color: #333;
+}
+
+.close:before {
+  transform: rotate(45deg);
+}
+
+.close:after {
+  transform: rotate(-45deg);
 }

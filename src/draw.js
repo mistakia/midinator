@@ -22,12 +22,23 @@ const drawColumnParams = (program, parent) => {
 }
 
 const drawProgramList = (programs) => {
+  clearProgramParams()
   const programListElem = document.getElementById('program-list')
   programListElem.innerHTML = ''
 
-  programs.forEach((p) => {
+  programs.forEach((p, idx) => {
     const programElem = document.createElement('div')
     programElem.className = 'program-item'
+
+    const remove = document.createElement('div')
+    remove.className = 'close'
+    programElem.appendChild(remove)
+    remove.addEventListener('click', (event) => {
+      event.stopPropagation()
+      programs.splice(idx, 1)
+      drawProgramList(programs)
+    })
+
     const select = document.createElement('select')
     Object.keys(PROGRAMS).forEach((name) => {
       const option = document.createElement('option')
