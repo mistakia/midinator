@@ -55,6 +55,29 @@ const drawProgramList = (programs) => {
       const programParamElem = document.getElementById('program-params')
       programParamElem.innerHTML = ''
       programParamElem.appendChild(paramElem)
+
+      const canvas = document.getElementById('preview')
+      const ctx = canvas.getContext('2d')
+      const rect = canvas.parentNode.getBoundingClientRect()
+      canvas.width = rect.width
+      canvas.height = rect.height
+      ctx.fillStyle = '#000'
+      ctx.fillRect(0, 0, rect.width, rect.height)
+
+      let delta = 0
+      const animate = () => {
+        if (programElem.classList.contains('active') && programElem.parentNode)
+          window.requestAnimationFrame(animate)
+
+        if (delta > (p.params.length || 10)) delta = 0
+        else delta += 1
+
+        canvas.width = canvas.width
+        const cnvs = PROGRAMS[programName].run({ delta, ...p.params })
+        ctx.drawImage(cnvs, 0, 0)
+      }
+
+      window.requestAnimationFrame(animate)
     })
     programElem.appendChild(select)
     programListElem.appendChild(programElem)

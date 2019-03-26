@@ -149,13 +149,18 @@ progress[value]::-webkit-progress-value {
     flex: 2 0 auto;
     position: relative;
     background: #fafafa;
-    max-width: 66%;
+    max-width: 50%;
     padding: 15px;
 }
 
 #program-params label {
     margin-left: 10px;
     padding-right: 4px;
+}
+
+#program-preview {
+    flex: 0 0 auto;
+    width: 200px;
 }
 
 .program-item {
