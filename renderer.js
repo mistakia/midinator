@@ -117,6 +117,10 @@ const showExportDialog = () => {
 
 const exportVideo = (outputPath) => {
   console.log('clearing frames')
+
+  if (!fs.existsSync('./tmp')) {
+    fs.mkdirSync('./tmp')
+  }
   rimraf.sync('tmp/*')
 
   console.log('making frames')
