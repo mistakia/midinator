@@ -1,3 +1,5 @@
 module.exports = {
-  BLINK: require('./blink')
+  'fade': require('./fade'),
+  'fill': require('./fill'),
+  'slide': require('./slide')
 }
