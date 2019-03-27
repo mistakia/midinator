@@ -1,24 +1,15 @@
+const eases = require('d3-ease')
+
 const timeline = document.getElementById('timeline')
 const PROGRAMS = require('./programs')
 const {
   clearProgramActive,
   clearNoteActive,
-  clearProgramParams
+  clearProgramParams,
+  renderProgramParam
 } = require('./utils')
 
-const drawColumnParams = (program, parent) => {
-  const { columns } = program
-  const label = document.createElement('label')
-  label.innerHTML = 'Columns:'
-  const input = document.createElement('input')
-  input.value = columns.length ? columns.toString() : ''
-  input.oninput = () => {
-    const values = JSON.parse('[' + input.value + ']')
-    //TODO: validate
-    program.columns = values
-  }
-  parent.appendChild(label)
-  parent.appendChild(input)
+const renderColumnParams = (program, parent) => {
 }
 
 const drawProgramList = (programs) => {
@@ -45,16 +36,50 @@ const drawProgramList = (programs) => {
       option.text = name
       select.add(option)
     })
-    programElem.addEventListener('click', (event) => {
+
+    const drawActiveProgram = () => {
       clearProgramActive()
       programElem.className += ' active'
 
-      const programName = select.value
-      const paramElem = PROGRAMS[programName].renderParams({ params: p.params } )
-      drawColumnParams(p, paramElem)
       const programParamElem = document.getElementById('program-params')
       programParamElem.innerHTML = ''
-      programParamElem.appendChild(paramElem)
+
+      const programName = select.value
+      PROGRAMS[programName].renderParams({
+        params: p.params,
+        parent: programParamElem
+      })
+
+      const easeSelectLabel = document.createElement('label')
+      easeSelectLabel.innerHTML = 'Easing:'
+      const easeSelect = document.createElement('select')
+      Object.keys(eases).forEach((ease) => {
+        const option = document.createElement('option')
+        option.text = ease
+        easeSelect.add(option)
+      })
+      if (p.params.ease) easeSelect.value = p.params.ease
+      easeSelect.addEventListener('input', () => {
+        p.params.ease = easeSelect.value
+      })
+      renderProgramParam({
+        label: 'Easing:',
+        inputElem: easeSelect,
+        parent: programParamElem
+      })
+
+      const columnInput = document.createElement('input')
+      columnInput.value = p.columns.length ? p.columns.toString() : ''
+      columnInput.oninput = () => {
+        const values = JSON.parse('[' + columnInput.value + ']')
+        //TODO: validate
+        p.columns = values
+      }
+      renderProgramParam({
+        label: 'Columns:',
+        inputElem: columnInput,
+        parent: programParamElem
+      })
 
       const canvas = document.getElementById('preview')
       const ctx = canvas.getContext('2d')
@@ -78,7 +103,10 @@ const drawProgramList = (programs) => {
       }
 
       window.requestAnimationFrame(animate)
-    })
+    }
+
+    select.addEventListener('input', drawActiveProgram)
+    programElem.addEventListener('click', drawActiveProgram)
     programElem.appendChild(select)
     programListElem.appendChild(programElem)
   })
@@ -86,7 +114,7 @@ const drawProgramList = (programs) => {
   const addProgramElem = document.createElement('div')
   addProgramElem.className = 'program-item'
   addProgramElem.innerHTML = 'Add Program'
-  addProgramElem.addEventListener('click', (event) => {
+  addProgramElem.addEventListener('click', () => {
     const firstProgram = Object.keys(PROGRAMS)[0]
     programs.push({ name: firstProgram, params: {}, columns: [] })
     drawProgramList(programs)

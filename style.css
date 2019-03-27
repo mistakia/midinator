@@ -1,6 +1,7 @@
 html, body {
     margin: 0;
     height: 100%;
+    overflow: hidden;
 }
 
 main {
@@ -151,11 +152,14 @@ progress[value]::-webkit-progress-value {
     background: #fafafa;
     max-width: 50%;
     padding: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    overflow-y: scroll;
 }
 
-#program-params label {
-    margin-left: 10px;
-    padding-right: 4px;
+.program-param {
+    flex: 1 1 auto;
+    margin: 4px;
 }
 
 #program-preview {

@@ -13,16 +13,27 @@ const clearProgramParams = () => {
   programParams.innerHTML = ''
 }
 
+const renderProgramParam = ({ label, inputElem, parent }) => {
+  const programParamContainer = document.createElement('div')
+  programParamContainer.className = 'program-param'
+
+  const labelElem = document.createElement('label')
+  labelElem.innerHTML = label
+  programParamContainer.appendChild(labelElem)
+  programParamContainer.appendChild(inputElem)
+  parent.appendChild(programParamContainer)
+}
+
 const setCanvas = (canvas, ctx) => {
-  canvas.width = 600
-  canvas.height = 200
+  canvas.width = canvas.width
   ctx.fillStyle = '#000'
-  ctx.fillRect(0, 0, 600, 200)
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
 }
 
 module.exports = {
   clearNoteActive,
   clearProgramActive,
   clearProgramParams,
+  renderProgramParam,
   setCanvas
 }

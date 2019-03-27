@@ -20,6 +20,8 @@ let Project = {}
 const timeline = document.getElementById('timeline')
 const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
+canvas.width = 600
+canvas.height = 200
 setCanvas(canvas, ctx)
 
 const loadMidi = () => {
