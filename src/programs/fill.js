@@ -1,6 +1,6 @@
 const eases = require('d3-ease')
 
-const { setCanvas, renderProgramParam } = require('../utils')
+const { renderProgramParam } = require('../utils')
 
 const canvas = document.createElement('canvas')
 const ctx = canvas.getContext('2d')
@@ -9,8 +9,9 @@ const COLOR_DEFAULT = '255,255,255'
 const LENGTH_DEFAULT = 10
 const EASE_DEFAULT = 'easeLinear'
 
-const run = ({ delta, color, length, ease, brightness }) => {
-  setCanvas(canvas, ctx)
+const run = ({ delta, color, length, ease, brightness, width, height }) => {
+  canvas.width = width
+  canvas.height = height
 
   //TODO: validate params
   color = color || COLOR_DEFAULT
@@ -21,11 +22,13 @@ const run = ({ delta, color, length, ease, brightness }) => {
   const easeFn = eases[ease]
   const t = delta / length
 
+  if (t > 1) return canvas
+
   const easeValue = easeFn(t)
 
-  const height = Math.floor(easeValue * canvas.height)
+  const rectHeight = Math.floor(easeValue * canvas.height)
   ctx.fillStyle = `rgba(${color},${brightness})`
-  ctx.fillRect(0,0, 600, height)
+  ctx.fillRect(0,0, 600, rectHeight)
 
   return canvas
 }
@@ -41,7 +44,7 @@ const renderParams = ({ params, parent }) => {
   const lengthInput = document.createElement('input')
   lengthInput.value = params.length || LENGTH_DEFAULT
   lengthInput.oninput = () => {
-    params.length = lengthInput.value
+    params.length = parseInt(lengthInput.value, 10)
   }
   renderProgramParam({ label: 'Length:', inputElem: lengthInput, parent })
 }
