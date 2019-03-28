@@ -124,7 +124,6 @@ const showExportDialog = () => {
 
 const exportVideo = (outputPath) => {
   console.log('clearing frames')
-
   if (!fs.existsSync('./tmp')) {
     fs.mkdirSync('./tmp')
   }
@@ -136,6 +135,8 @@ const exportVideo = (outputPath) => {
   const renderFrame = () => {
     // reset canvas
     canvas.width = canvas.width
+    ctx.fillStyle = 'black'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
 
     for (let e=0; e < Project.midiEvents.length; e++) {
       const midiEvent = Project.midiEvents[e]
@@ -182,6 +183,7 @@ const exportVideo = (outputPath) => {
     } else runFFmpeg(outputPath)
   }
 
+  console.log('rendering frames')
   renderFrame()
 }
 
