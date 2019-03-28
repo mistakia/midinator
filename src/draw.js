@@ -140,6 +140,9 @@ const drawTimeline = ({ Player, Project }) => {
   console.log(`Tempo: ${Player.tempo}`)
   console.log(`Measures: ${totalMeasures}`)
 
+  document.getElementById('tempo').innerHTML = `Tempo: ${Player.tempo}`
+  document.getElementById('division').innerHTML = `Division: ${Player.division}`
+
   const drawNote = (event, eventIndex) => {
     const elem = document.createElement('div')
     elem.className = 'note'

@@ -44,8 +44,11 @@ canvas {
     border-bottom: 1px solid #ccc;
 }
 
+#timeline-controls > div,
 #timeline-controls > button {
     flex: 0 0 auto;
+    font-size: 10px;
+    margin: 0 4px;
 }
 
 progress {
