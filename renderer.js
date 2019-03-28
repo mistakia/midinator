@@ -11,7 +11,6 @@ const { dialog, getCurrentWindow } = require('electron').remote
 const win = getCurrentWindow()
 
 let PROGRAMS = require('./src/programs')
-const { setCanvas } = require('./src/utils')
 const { drawTimeline } = require('./src/draw')
 
 let Player
@@ -22,7 +21,6 @@ const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
 canvas.width = 600
 canvas.height = 200
-setCanvas(canvas, ctx)
 
 const loadMidi = () => {
   dialog.showOpenDialog({
@@ -53,7 +51,6 @@ const play = () => {
     return document.querySelector('#play').innerHTML = 'Play'
   }
 
-  let currentEvent
   let currentTick = 0
   const currentPosition = document.createElement('div')
   currentPosition.id = 'current-position'
@@ -68,16 +65,24 @@ const play = () => {
     currentPosition.setAttribute('style', `left: ${position}%;`)
     if (parent && Player.isPlaying()) parent.appendChild(currentPosition)
 
-    if (!currentEvent) return
-    if (currentEvent.name !== 'Note on') return
+    // reset canvas
+    canvas.width = canvas.width
 
-    setCanvas(canvas, ctx)
-    const delta = currentTick - currentEvent.tick
-    const { programs } = currentEvent
-    if (programs.length) {
-      programs.forEach((p) => {
-        const cnvs = PROGRAMS[p.name].run({ delta, ...p.params })
-        if (!p.columns.length) return ctx.drawImage(cnvs, 0, 0)
+    for (let e=0; e < Project.midiEvents.length; e++) {
+      const midiEvent = Project.midiEvents[e]
+
+      if (midiEvent.tick > currentTick) continue
+      if (midiEvent.name !== 'Note on') continue
+      if (!midiEvent.programs.length) continue
+
+      midiEvent.programs.forEach((program) => {
+        const end = program.params.length + midiEvent.tick
+        if (currentTick > end) return
+
+        const delta = currentTick - midiEvent.tick
+        const cnvs = PROGRAMS[program.name].run({ height: canvas.height, width: canvas.width, delta, ...program.params })
+
+        if (!program.columns.length) return ctx.drawImage(cnvs, 0, 0)
         for (let i=0; i<program.columns.length; i++) {
           const column = program.columns[i]
           const sx = (column * 100) - 100
@@ -96,7 +101,7 @@ const play = () => {
   }
 
   Player.on('playing', (tick) => currentTick = tick.tick)
-  Player.on('midiEvent', (event) => currentEvent = event)
+  //Player.on('midiEvent', (event) => currentEvent = event)
 
 
   Player.play()
@@ -125,20 +130,25 @@ const exportVideo = (outputPath) => {
   }
   rimraf.sync('tmp/*')
 
-  console.log('making frames')
-  let createdFrames = {}
-  for (let i=0; i < Project.midiEvents.length; i++) {
-    const midiEvent = Project.midiEvents[i]
-    if (midiEvent.name !== 'Note on') continue
-    if (!midiEvent.programs.length) continue
+  const progressElem = document.getElementById('progress')
+  let f = 0
 
-    const nextEvent = Project.midiEvents[i+1]
-    let start = midiEvent.tick
-    const end = nextEvent ? nextEvent.tick : Player.totalTicks
-    for (;start < end; start++) {
-      setCanvas(canvas, ctx)
-      const delta = start - midiEvent.tick
+  const renderFrame = () => {
+    // reset canvas
+    canvas.width = canvas.width
+
+    for (let e=0; e < Project.midiEvents.length; e++) {
+      const midiEvent = Project.midiEvents[e]
+
+      if (midiEvent.tick > f) continue
+      if (midiEvent.name !== 'Note on') continue
+      if (!midiEvent.programs.length) continue
+
       midiEvent.programs.forEach((program) => {
+        const end = (program.params.length || 10) + midiEvent.tick
+        if (f > end) return
+
+        const delta = f - midiEvent.tick
         const cnvs = PROGRAMS[program.name].run({ delta, ...program.params })
 
         if (!program.columns.length) return ctx.drawImage(cnvs, 0, 0)
@@ -156,35 +166,23 @@ const exportVideo = (outputPath) => {
           )
         }
       })
-
-      createdFrames[start] = true
-      const frame = new Frame(canvas, { quality: 1, image: { types: ['png'] }})
-      fs.writeFileSync('tmp/' + leftpad(start, 5) + '.png', frame.toBuffer())
     }
-  }
 
-  setCanvas(canvas, ctx)
-  console.log('filling in background')
-  let i=0
-  const progressElem = document.getElementById('progress')
+    const frame = new Frame(canvas, { quality: 1, image: { types: ['png'] }})
+    fs.writeFileSync('tmp/' + leftpad(start, 5) + '.png', frame.toBuffer())
 
-  const renderBackgroundFrame = () => {
-    i += 1
-    if (!createdFrames[i]) {
-      const frame = new Frame(canvas, { quality: 1, image: { types: ['png'] }})
-      fs.writeFileSync('tmp/' + leftpad(i, 5) + '.png', frame.toBuffer())
-    }
-    if (i < Player.totalTicks) {
+    if (f < Player.totalTicks) {
       const percent = `${Math.round(i/Player.totalTicks * 100)}`
 
+      f += 1
       if (progressElem.value != percent) {
         progressElem.value = parseInt(percent, 10)
-        setTimeout(() => renderBackgroundFrame(), 30)
-      } else renderBackgroundFrame()
+        setTimeout(() => renderFrame(), 30)
+      } else renderFrame()
     } else runFFmpeg(outputPath)
   }
 
-  renderBackgroundFrame()
+  renderFrame()
 }
 
 const runFFmpeg = (outputPath) => {

@@ -24,16 +24,9 @@ const renderProgramParam = ({ label, inputElem, parent }) => {
   parent.appendChild(programParamContainer)
 }
 
-const setCanvas = (canvas, ctx) => {
-  canvas.width = canvas.width
-  ctx.fillStyle = '#000'
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
-}
-
 module.exports = {
   clearNoteActive,
   clearProgramActive,
   clearProgramParams,
-  renderProgramParam,
-  setCanvas
+  renderProgramParam
 }

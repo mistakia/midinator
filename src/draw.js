@@ -9,8 +9,7 @@ const {
   renderProgramParam
 } = require('./utils')
 
-const renderColumnParams = (program, parent) => {
-}
+const LENGTH_DEFAULT = 10
 
 const drawProgramList = (programs) => {
   clearProgramParams()
@@ -86,26 +85,27 @@ const drawProgramList = (programs) => {
       const rect = canvas.parentNode.getBoundingClientRect()
       canvas.width = rect.width
       canvas.height = rect.height
-      ctx.fillStyle = '#000'
-      ctx.fillRect(0, 0, rect.width, rect.height)
 
       let delta = 0
       const animate = () => {
         if (programElem.classList.contains('active') && programElem.parentNode)
           window.requestAnimationFrame(animate)
 
-        if (delta > (p.params.length || 10)) delta = 0
+        if (delta > p.params.length) delta = 0
         else delta += 1
 
         canvas.width = canvas.width
-        const cnvs = PROGRAMS[programName].run({ delta, ...p.params })
+        const cnvs = PROGRAMS[programName].run({ height: canvas.height, width: canvas.width, delta, ...p.params })
         ctx.drawImage(cnvs, 0, 0)
       }
 
       window.requestAnimationFrame(animate)
     }
 
-    select.addEventListener('input', drawActiveProgram)
+    select.addEventListener('input', () => {
+      p.name = select.value
+      drawActiveProgram()
+    })
     programElem.addEventListener('click', drawActiveProgram)
     programElem.appendChild(select)
     programListElem.appendChild(programElem)
@@ -116,7 +116,7 @@ const drawProgramList = (programs) => {
   addProgramElem.innerHTML = 'Add Program'
   addProgramElem.addEventListener('click', () => {
     const firstProgram = Object.keys(PROGRAMS)[0]
-    programs.push({ name: firstProgram, params: {}, columns: [] })
+    programs.push({ name: firstProgram, params: { length: LENGTH_DEFAULT }, columns: [] })
     drawProgramList(programs)
   })
   programListElem.appendChild(addProgramElem)
