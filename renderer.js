@@ -149,7 +149,7 @@ const exportVideo = (outputPath) => {
         if (f > end) return
 
         const delta = f - midiEvent.tick
-        const cnvs = PROGRAMS[program.name].run({ delta, ...program.params })
+        const cnvs = PROGRAMS[program.name].run({ delta, ...program.params, height: canvas.height, width: canvas.width })
 
         if (!program.columns.length) return ctx.drawImage(cnvs, 0, 0)
         for (let i=0; i<program.columns.length; i++) {
@@ -169,10 +169,10 @@ const exportVideo = (outputPath) => {
     }
 
     const frame = new Frame(canvas, { quality: 1, image: { types: ['png'] }})
-    fs.writeFileSync('tmp/' + leftpad(start, 5) + '.png', frame.toBuffer())
+    fs.writeFileSync('tmp/' + leftpad(f, 5) + '.png', frame.toBuffer())
 
     if (f < Player.totalTicks) {
-      const percent = `${Math.round(i/Player.totalTicks * 100)}`
+      const percent = `${Math.round(f/Player.totalTicks * 100)}`
 
       f += 1
       if (progressElem.value != percent) {
