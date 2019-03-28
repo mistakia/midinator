@@ -16,6 +16,7 @@ const { drawTimeline } = require('./src/draw')
 let Player
 let Project = {}
 
+const progressElem = document.getElementById('progress')
 const timeline = document.getElementById('timeline')
 const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
@@ -129,7 +130,6 @@ const exportVideo = (outputPath) => {
   }
   rimraf.sync('tmp/*')
 
-  const progressElem = document.getElementById('progress')
   let f = 0
 
   const renderFrame = () => {
@@ -198,11 +198,16 @@ const runFFmpeg = (outputPath) => {
     .outputOptions(['-pix_fmt yuv420p'])
     .outputFps(40)
     .output(outputPath)
+    .on('progress', function(progress) {
+      console.log(progress.percent)
+      progressElem.value = Math.floor(progress.percent)
+    })
     .on('end', function() {
+      dialog.showMessageBox({ type: 'info', message: 'Export Finished' })
       console.log('Finished processing')
     })
     .on('error', function(err, stdout, stderr) {
-      alert(`Error: ${err.message}`)
+      dialog.showErrorBox(err.message, err)
       console.log('Cannot process video: ' + err.message)
     })
     .run()
