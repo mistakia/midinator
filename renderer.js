@@ -11,10 +11,16 @@ const { dialog, getCurrentWindow } = require('electron').remote
 const win = getCurrentWindow()
 
 let PROGRAMS = require('./src/programs')
-const { drawTimeline } = require('./src/draw')
+const { renderApp } = require('./src/app')
 
 let Player
-let Project = {}
+let Project = require('./src/project')
+
+if (Project.midiFile) {
+  Player = new MidiPlayer.Player()
+  Player.loadFile(Project.midiFile)
+  renderApp({ Player })
+}
 
 const progressElem = document.getElementById('progress')
 const timeline = document.getElementById('timeline')
@@ -38,7 +44,7 @@ const loadMidi = () => {
       Player.loadFile(Project.midiFile)
 
       Project.midiEvents = Player.getEvents()[0]
-      drawTimeline({ Player, Project })
+      renderApp({ Player })
     }
   })
 }
@@ -199,7 +205,6 @@ const runFFmpeg = (outputPath) => {
     .outputFps(40)
     .output(outputPath)
     .on('progress', function(progress) {
-      console.log(progress.percent)
       progressElem.value = Math.floor(progress.percent)
     })
     .on('end', function() {
@@ -223,6 +228,7 @@ const save = () => {
   }, function (file) {
     if (file) {
       jsonfile.writeFileSync(file, Project)
+      localStorage.setItem('projectFile', file)
     }
   })
 }
@@ -243,7 +249,7 @@ const loadJSON = () => {
       Player.on('fileLoaded', () => {
         Player.tracks[0].events = Project.midiEvents
         Player.events[0] = Project.midiEvents
-        drawTimeline({ Player, Project })
+        renderApp({ Player })
       })
       Player.loadFile(Project.midiFile)
     }
