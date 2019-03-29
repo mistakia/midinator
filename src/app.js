@@ -11,6 +11,17 @@ const {
 
 const LENGTH_DEFAULT = 10
 
+let Project = require('./project')
+let selectedNotes = []
+
+const getMidiEvent = (byteIndex) => Project.midiEvents.find(e => e.byteIndex == byteIndex)
+const getMidiRange = (start, end) => {
+  return Project.midiEvents.filter(e => {
+    if (e.name !== 'Note on') return false
+    return e.byteIndex > start && e.byteIndex < end
+  })
+}
+
 const drawProgramList = (programs) => {
   clearProgramParams()
   const programListElem = document.getElementById('program-list')
@@ -35,6 +46,7 @@ const drawProgramList = (programs) => {
       option.text = name
       select.add(option)
     })
+    if (p.name) select.value = p.name
 
     const drawActiveProgram = () => {
       clearProgramActive()
@@ -129,7 +141,7 @@ const drawMeasure = (measureNumber) => {
   timeline.appendChild(elem)
 }
 
-const drawTimeline = ({ Player, Project }) => {
+const renderApp = ({ Player }) => {
   timeline.innerHTML = '' //clear timeline
 
   const totalTicks = Player.totalTicks
@@ -143,27 +155,65 @@ const drawTimeline = ({ Player, Project }) => {
   document.getElementById('tempo').innerHTML = `Tempo: ${Player.tempo}`
   document.getElementById('division').innerHTML = `Division: ${Player.division}`
 
-  const drawNote = (event, eventIndex) => {
+  const drawNote = (midiEvent) => {
     const elem = document.createElement('div')
     elem.className = 'note'
 
-    const measureNumber = Math.floor(event.tick / measureLength) + 1
+    const measureNumber = Math.floor(midiEvent.tick / measureLength) + 1
 
     const parent = document.querySelector(`.measure:nth-child(${measureNumber})`)
-    const position = ((event.tick % measureLength) / measureLength) * 100
+    const position = ((midiEvent.tick % measureLength) / measureLength) * 100
     elem.setAttribute('style', `left: ${position}%;`)
-    elem.dataset.eventIndex = eventIndex
+    elem.dataset.byteIndex = midiEvent.byteIndex
     parent.appendChild(elem)
   }
 
   const loadNote = (event) => {
-    clearNoteActive()
+    if (!event.metaKey && !event.shiftKey) clearNoteActive()
     clearProgramParams()
     event.target.className += ' active'
-    const eventIndex = event.target.dataset.eventIndex
-    const midiEvent = Project.midiEvents[eventIndex]
+    const { byteIndex } = event.target.dataset
+    const midiEvent = getMidiEvent(byteIndex)
 
-    let { programs } = midiEvent
+    if (event.metaKey) selectedNotes.push(midiEvent)
+    else if (event.shiftKey && selectedNotes.length) {
+      const lastNote = selectedNotes[selectedNotes.length - 1]
+
+      const start = Math.min(byteIndex, lastNote.byteIndex)
+      const end = Math.max(byteIndex, lastNote.byteIndex)
+      const notes = getMidiRange(start, end)
+
+      notes.forEach((n) => {
+        const elem = document.querySelector(`.note[data-byte-index="${n.byteIndex}"]`)
+        elem.className += ' active'
+      })
+
+      selectedNotes = selectedNotes.concat(notes)
+      selectedNotes.push(midiEvent)
+
+      // get all the values in between
+    } else selectedNotes = [midiEvent]
+
+    // set program var
+    let { programs } = selectedNotes[0]
+    programs = programs.slice(0)
+
+    // check if equal
+    let matchingPrograms = true
+    for (let i=0; i < selectedNotes.length; i++) {
+      let p = selectedNotes[i].programs
+      if (JSON.stringify(p) !== JSON.stringify(programs)) {
+        matchingPrograms = false
+        break
+      }
+    }
+
+    if (!matchingPrograms) programs = []
+
+    // set selectedNotes to program
+    selectedNotes.forEach((note) => {
+      note.programs = programs
+    })
     drawProgramList(programs)
   }
 
@@ -172,10 +222,10 @@ const drawTimeline = ({ Player, Project }) => {
   }
 
   for (let i=0; i < Project.midiEvents.length; i++) {
-    const event = Project.midiEvents[i]
-    if (event.name !== 'Note on') continue
-    event.programs = event.programs || []
-    drawNote(event, i)
+    const midiEvent = Project.midiEvents[i]
+    if (midiEvent.name !== 'Note on') continue
+    midiEvent.programs = midiEvent.programs || []
+    drawNote(midiEvent)
   }
 
   const noteElems = document.querySelectorAll('.note')
@@ -183,5 +233,5 @@ const drawTimeline = ({ Player, Project }) => {
 }
 
 module.exports = {
-  drawTimeline
+  renderApp
 }
