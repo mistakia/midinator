@@ -135,13 +135,17 @@ progress[value]::-webkit-progress-value {
     position: absolute;
     top: 0;
     bottom: 0;
-    background-color: #000;
+    background-color: rgba(0,0,0,0.1);
     width: 4px;
     cursor: pointer;
 }
 
 .note:hover {
     background-color: yellow;
+}
+
+.note.not-empty {
+    background-color: #000;
 }
 
 .note.active {
