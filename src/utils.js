@@ -1,6 +1,6 @@
 const clearNoteActive = () => {
   const noteElems = document.querySelectorAll('.note')
-  noteElems.forEach((elem) => elem.className = 'note')
+  noteElems.forEach((elem) => elem.classList.remove('active'))
 }
 
 const clearProgramActive = () => {

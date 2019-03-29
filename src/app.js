@@ -14,6 +14,7 @@ const LENGTH_DEFAULT = 10
 let Project = require('./project')
 let selectedNotes = []
 
+const getNoteElem = (byteIndex) => document.querySelector(`.note[data-byte-index="${byteIndex}"]`)
 const getMidiEvent = (byteIndex) => Project.midiEvents.find(e => e.byteIndex == byteIndex)
 const getMidiRange = (start, end) => {
   return Project.midiEvents.filter(e => {
@@ -37,6 +38,12 @@ const drawProgramList = (programs) => {
     remove.addEventListener('click', (event) => {
       event.stopPropagation()
       programs.splice(idx, 1)
+      if (!programs.length) {
+        selectedNotes.forEach((note) => {
+          const elem = getNoteElem(note.byteIndex)
+          elem.classList.remove('not-empty')
+        })
+      }
       drawProgramList(programs)
     })
 
@@ -50,7 +57,7 @@ const drawProgramList = (programs) => {
 
     const drawActiveProgram = () => {
       clearProgramActive()
-      programElem.className += ' active'
+      programElem.classList.add('active')
 
       const programParamElem = document.getElementById('program-params')
       programParamElem.innerHTML = ''
@@ -128,6 +135,12 @@ const drawProgramList = (programs) => {
   addProgramElem.innerHTML = 'Add Program'
   addProgramElem.addEventListener('click', () => {
     const firstProgram = Object.keys(PROGRAMS)[0]
+    if (!programs.length) {
+      selectedNotes.forEach((note) => {
+        const elem = getNoteElem(note.byteIndex)
+        elem.classList.add('not-empty')
+      })
+    }
     programs.push({ name: firstProgram, params: { length: LENGTH_DEFAULT }, columns: [] })
     drawProgramList(programs)
   })
@@ -159,8 +172,8 @@ const renderApp = ({ Player }) => {
     const elem = document.createElement('div')
     elem.className = 'note'
 
+    if (midiEvent.programs.length) elem.classList.add('not-empty')
     const measureNumber = Math.floor(midiEvent.tick / measureLength) + 1
-
     const parent = document.querySelector(`.measure:nth-child(${measureNumber})`)
     const position = ((midiEvent.tick % measureLength) / measureLength) * 100
     elem.setAttribute('style', `left: ${position}%;`)
@@ -171,7 +184,7 @@ const renderApp = ({ Player }) => {
   const loadNote = (event) => {
     if (!event.metaKey && !event.shiftKey) clearNoteActive()
     clearProgramParams()
-    event.target.className += ' active'
+    event.target.classList.add('active')
     const { byteIndex } = event.target.dataset
     const midiEvent = getMidiEvent(byteIndex)
 
@@ -184,8 +197,8 @@ const renderApp = ({ Player }) => {
       const notes = getMidiRange(start, end)
 
       notes.forEach((n) => {
-        const elem = document.querySelector(`.note[data-byte-index="${n.byteIndex}"]`)
-        elem.className += ' active'
+        const elem = getNoteElem(n.byteIndex)
+        elem.classList.add('active')
       })
 
       selectedNotes = selectedNotes.concat(notes)
@@ -212,6 +225,10 @@ const renderApp = ({ Player }) => {
 
     // set selectedNotes to program
     selectedNotes.forEach((note) => {
+      if (!programs.length) {
+        const elem = getNoteElem(note.byteIndex)
+        elem.classList.remove('not-empty')
+      }
       note.programs = programs
     })
     drawProgramList(programs)
