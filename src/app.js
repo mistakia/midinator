@@ -6,12 +6,15 @@ const {
   clearProgramActive,
   clearNoteActive,
   clearProgramParams,
+  clearSelectedMeasure,
   renderProgramParam
 } = require('./utils')
 
 const LENGTH_DEFAULT = 10
 
 let Project = require('./project')
+const Audio = require('./audio')
+let { getPlayer } = require('./player')
 let selectedNotes = []
 
 const getNoteElem = (byteIndex) => document.querySelector(`.note[data-byte-index="${byteIndex}"]`)
@@ -151,22 +154,28 @@ const drawMeasure = (measureNumber) => {
   const elem = document.createElement('div')
   elem.className = 'measure'
   elem.dataset.measureNumber = measureNumber
+  elem.addEventListener('click', () => {
+    clearSelectedMeasure()
+    elem.classList.add('selected')
+    setPosition(measureNumber)
+  })
   timeline.appendChild(elem)
 }
 
-const renderApp = ({ Player }) => {
+const renderApp = () => {
+  const player = getPlayer()
   timeline.innerHTML = '' //clear timeline
 
-  const totalTicks = Player.totalTicks
-  const measureLength = Player.division * 4
+  const totalTicks = player.totalTicks
+  const measureLength = player.division * 4
   const totalMeasures = Math.ceil(totalTicks / measureLength)
   console.log(`Total ticks: ${totalTicks}`)
-  console.log(`Division: ${Player.division}`)
-  console.log(`Tempo: ${Player.tempo}`)
+  console.log(`Division: ${player.division}`)
+  console.log(`Tempo: ${player.tempo}`)
   console.log(`Measures: ${totalMeasures}`)
 
-  document.getElementById('tempo').innerHTML = `Tempo: ${Player.tempo}`
-  document.getElementById('division').innerHTML = `Division: ${Player.division}`
+  document.getElementById('tempo').innerHTML = `Tempo: ${player.tempo}`
+  document.getElementById('division').innerHTML = `Division: ${player.division}`
 
   const drawNote = (midiEvent) => {
     const elem = document.createElement('div')
@@ -182,6 +191,7 @@ const renderApp = ({ Player }) => {
   }
 
   const loadNote = (event) => {
+    event.stopPropagation()
     if (!event.metaKey && !event.shiftKey) clearNoteActive()
     clearProgramParams()
     event.target.classList.add('active')
@@ -247,6 +257,16 @@ const renderApp = ({ Player }) => {
 
   const noteElems = document.querySelectorAll('.note')
   noteElems.forEach((elem) => elem.addEventListener('click', loadNote))
+}
+
+const setPosition = (measure) => {
+  const player = getPlayer()
+  if (player.isPlaying()) return
+  const tick = (measure - 1) * (player.division * 4)
+  player.skipToTick(tick)
+  const totalTime = player.getSongTime()
+  const timeRemaining = player.getSongTimeRemaining()
+  Audio.sound.seek(totalTime - timeRemaining)
 }
 
 module.exports = {

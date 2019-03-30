@@ -2,7 +2,6 @@ const fs = require('fs')
 
 const leftpad = require('leftpad')
 const Frame  = require('canvas-to-buffer')
-const MidiPlayer = require('midi-player-js')
 const rimraf = require('rimraf')
 const ffmpeg = require('fluent-ffmpeg')
 const jsonfile = require('jsonfile')
@@ -13,14 +12,14 @@ const win = getCurrentWindow()
 let Programs = require('./src/programs')
 const { renderApp } = require('./src/app')
 
-let Player
+const { clearSelectedMeasure } = require('./src/utils')
+let { getPlayer, loadMidiPlayer } = require('./src/player')
 let Project = require('./src/project')
 let Audio = require('./src/audio')
 
 if (Project.midiFile) {
-  Player = new MidiPlayer.Player()
-  Player.loadFile(Project.midiFile)
-  renderApp({ Player })
+  loadMidiPlayer(Project.midiFile)
+  renderApp()
 }
 
 if (Project.programs.length) {
@@ -42,7 +41,7 @@ const ctx = canvas.getContext('2d')
 canvas.width = 600
 canvas.height = 200
 
-const loadMidi = () => {
+const loadMidiFile = () => {
   dialog.showOpenDialog({
     title: 'Load Midi File',
     message: 'select a .mid file',
@@ -53,20 +52,21 @@ const loadMidi = () => {
   }, function (files) {
     if (files !== undefined) {
       Project.midiFile = files[0]
-      Player = new MidiPlayer.Player()
-      Player.loadFile(Project.midiFile)
-
-      Project.midiEvents = Player.getEvents()[0]
-      renderApp({ Player })
+      loadMidiPlayer(Project.midiFile)
+      const player = getPlayer()
+      Project.midiEvents = player.getEvents()[0]
+      renderApp()
     }
   })
 }
 
 const play = () => {
-  if (!Player) return
-  if (Player.isPlaying()) {
-    Player.stop()
-    Audio.stop()
+  clearSelectedMeasure()
+  const player = getPlayer()
+  if (!player) return
+  if (player.isPlaying()) {
+    player.pause()
+    Audio.sound.pause()
     const elem = document.getElementById('current-position')
     if (elem.parentNode) elem.parentNode.removeChild(elem)
     return document.querySelector('#play').innerHTML = 'Play'
@@ -76,15 +76,15 @@ const play = () => {
   const currentPosition = document.createElement('div')
   currentPosition.id = 'current-position'
   const animate = () => {
-    if (Player.isPlaying()) window.requestAnimationFrame(animate)
+    if (player.isPlaying()) window.requestAnimationFrame(animate)
 
     if (currentPosition.parentNode) currentPosition.parentNode.removeChild(currentPosition)
-    const measureLength = Player.division * 4
+    const measureLength = player.division * 4
     const currentMeasure = Math.ceil(currentTick / measureLength)
     const parent = document.querySelector(`.measure:nth-child(${currentMeasure})`)
     const position = ((currentTick % measureLength) / measureLength) * 100
     currentPosition.setAttribute('style', `left: ${position}%;`)
-    if (parent && Player.isPlaying()) parent.appendChild(currentPosition)
+    if (parent && player.isPlaying()) parent.appendChild(currentPosition)
 
     // reset canvas
     canvas.width = canvas.width
@@ -121,13 +121,11 @@ const play = () => {
     }
   }
 
-  Player.on('playing', (tick) => currentTick = tick.tick)
-  //Player.on('midiEvent', (event) => currentEvent = event)
+  player.on('playing', (tick) => currentTick = tick.tick)
 
-
-  Player.play()
-  Audio.play()
-  document.querySelector('#play').innerHTML = 'Stop'
+  player.play()
+  Audio.sound.play()
+  document.querySelector('#play').innerHTML = 'Pause'
   window.requestAnimationFrame(animate)
 }
 
@@ -190,8 +188,8 @@ const exportVideo = (outputPath) => {
     const frame = new Frame(canvas, { quality: 1, image: { types: ['png'] }})
     fs.writeFileSync('tmp/' + leftpad(f, 5) + '.png', frame.toBuffer())
 
-    if (f < Player.totalTicks) {
-      const percent = `${Math.round(f/Player.totalTicks * 100)}`
+    if (f < player.totalTicks) {
+      const percent = `${Math.round(f/player.totalTicks * 100)}`
 
       f += 1
       if (progressElem.value != percent) {
@@ -206,10 +204,11 @@ const exportVideo = (outputPath) => {
 }
 
 const runFFmpeg = (outputPath) => {
+  const player = getPlayer()
   console.log('running ffmpeg')
   //TODO: run ffmpeg generate video
   // ffmpeg -r 192 -i frames/%5d.png -c:v libx264 -r 30 -pix_fmt yuv420p mp4/chappell.mp4
-  const inputFPS = 1000 / (60000 / (Player.tempo * Player.division))
+  const inputFPS = 1000 / (60000 / (player.tempo * player.division))
   const cmd = ffmpeg('tmp/%5d.png')
     .inputFPS(inputFPS)
     .videoCodec('libx264')
@@ -257,13 +256,12 @@ const loadJSON = () => {
     if (files !== undefined) {
       const file = files[0]
       Project = jsonfile.readFileSync(file)
-      Player = new MidiPlayer.Player()
-      Player.on('fileLoaded', () => {
-        Player.tracks[0].events = Project.midiEvents
-        Player.events[0] = Project.midiEvents
-        renderApp({ Player })
+      loadMidiPlayer(Project.midiFile, () => {
+        const player = getPlayer()
+        player.tracks[0].events = Project.midiEvents
+        player.events[0] = Project.midiEvents
+        renderApp()
       })
-      Player.loadFile(Project.midiFile)
 
       if (Project.programs.length) Programs.load(Project.programs)
     }
@@ -304,8 +302,16 @@ const loadAudio = () => {
   })
 }
 
+const stop = () => {
+  const player = getPlayer()
+  player.stop()
+  Audio.sound.stop()
+  document.querySelector('#play').innerHTML = 'Play'
+}
+
 document.querySelector('#play').addEventListener('click', play)
-document.querySelector('#loadMidi').addEventListener('click', loadMidi)
+document.querySelector('#stop').addEventListener('click', stop)
+document.querySelector('#loadMidi').addEventListener('click', loadMidiFile)
 document.querySelector('#loadJSON').addEventListener('click', loadJSON)
 document.querySelector('#save').addEventListener('click', save)
 document.querySelector('#export').addEventListener('click', showExportDialog)

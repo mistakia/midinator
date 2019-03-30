@@ -116,6 +116,10 @@ progress[value]::-webkit-progress-value {
     border-left: 10px solid #f00;
 }
 
+.measure.selected {
+    border-left: 10px solid green;
+}
+
 .measure::before {
     position: absolute;
     font-size: 12px;
