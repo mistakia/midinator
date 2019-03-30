@@ -58,11 +58,6 @@ progress {
     margin-right: 10px;
 }
 
-progress[value] {
-    -webkit-appearance: none;
-    appearance: none;
-}
-
 progress[value]::-webkit-progress-bar {
     background-color: white;
     border: 1px solid #ccc;

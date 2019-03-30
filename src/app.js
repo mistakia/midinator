@@ -1,7 +1,7 @@
 const eases = require('d3-ease')
 
 const timeline = document.getElementById('timeline')
-const PROGRAMS = require('./programs')
+const Programs = require('./programs')
 const {
   clearProgramActive,
   clearNoteActive,
@@ -48,7 +48,7 @@ const drawProgramList = (programs) => {
     })
 
     const select = document.createElement('select')
-    Object.keys(PROGRAMS).forEach((name) => {
+    Programs.list().forEach((name) => {
       const option = document.createElement('option')
       option.text = name
       select.add(option)
@@ -63,7 +63,7 @@ const drawProgramList = (programs) => {
       programParamElem.innerHTML = ''
 
       const programName = select.value
-      PROGRAMS[programName].renderParams({
+      Programs.renderParams(programName, {
         params: p.params,
         parent: programParamElem
       })
@@ -110,11 +110,11 @@ const drawProgramList = (programs) => {
         if (programElem.classList.contains('active') && programElem.parentNode)
           window.requestAnimationFrame(animate)
 
-        if (delta > p.params.length) delta = 0
+        if (delta >= p.params.length) delta = 0
         else delta += 1
 
         canvas.width = canvas.width
-        const cnvs = PROGRAMS[programName].run({ height: canvas.height, width: canvas.width, delta, ...p.params })
+        const cnvs = Programs.run(programName, { height: canvas.height, width: canvas.width, delta, ...p.params })
         ctx.drawImage(cnvs, 0, 0)
       }
 
@@ -134,7 +134,7 @@ const drawProgramList = (programs) => {
   addProgramElem.className = 'program-item'
   addProgramElem.innerHTML = 'Add Program'
   addProgramElem.addEventListener('click', () => {
-    const firstProgram = Object.keys(PROGRAMS)[0]
+    const firstProgram = Programs.list()[0]
     if (!programs.length) {
       selectedNotes.forEach((note) => {
         const elem = getNoteElem(note.byteIndex)
