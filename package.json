@@ -15,6 +15,7 @@
     "canvas-to-buffer": "^1.0.14",
     "d3-ease": "^1.0.5",
     "fluent-ffmpeg": "^2.1.2",
+    "howler": "^2.1.1",
     "jsonfile": "^5.0.0",
     "leftpad": "0.0.1",
     "midi-player-js": "^2.0.5",

@@ -15,6 +15,7 @@ const { renderApp } = require('./src/app')
 
 let Player
 let Project = require('./src/project')
+let Audio = require('./src/audio')
 
 if (Project.midiFile) {
   Player = new MidiPlayer.Player()
@@ -65,6 +66,7 @@ const play = () => {
   if (!Player) return
   if (Player.isPlaying()) {
     Player.stop()
+    Audio.stop()
     const elem = document.getElementById('current-position')
     if (elem.parentNode) elem.parentNode.removeChild(elem)
     return document.querySelector('#play').innerHTML = 'Play'
@@ -124,6 +126,7 @@ const play = () => {
 
 
   Player.play()
+  Audio.play()
   document.querySelector('#play').innerHTML = 'Stop'
   window.requestAnimationFrame(animate)
 }
@@ -284,9 +287,27 @@ const showProgramDialog = () => {
   })
 }
 
+const loadAudio = () => {
+  dialog.showOpenDialog({
+    title: 'Load Audio File',
+    message: 'select an audio file',
+    properties: ['openFile'],
+    filters: [
+      { name: 'Audio', extensions: ['flac', 'mp3', 'wav'] }
+    ]
+  }, async (files) => {
+    if (files !== undefined) {
+      const file = files[0]
+      Project.audioFile = file
+      Audio.load(file)
+    }
+  })
+}
+
 document.querySelector('#play').addEventListener('click', play)
 document.querySelector('#loadMidi').addEventListener('click', loadMidi)
 document.querySelector('#loadJSON').addEventListener('click', loadJSON)
 document.querySelector('#save').addEventListener('click', save)
 document.querySelector('#export').addEventListener('click', showExportDialog)
 document.querySelector('#loadProgram').addEventListener('click', showProgramDialog)
+document.querySelector('#loadAudio').addEventListener('click', loadAudio)
