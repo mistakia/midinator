@@ -10,7 +10,7 @@ const jsonfile = require('jsonfile')
 const { dialog, getCurrentWindow } = require('electron').remote
 const win = getCurrentWindow()
 
-let PROGRAMS = require('./src/programs')
+let Programs = require('./src/programs')
 const { renderApp } = require('./src/app')
 
 let Player
@@ -20,6 +20,18 @@ if (Project.midiFile) {
   Player = new MidiPlayer.Player()
   Player.loadFile(Project.midiFile)
   renderApp({ Player })
+}
+
+if (Project.programs.length) {
+  Programs.load(Project.programs)
+}
+
+if (!fs.existsSync('./frames')) {
+  fs.mkdirSync('./frames')
+}
+
+if (!fs.existsSync('./tmp')) {
+  fs.mkdirSync('./tmp')
 }
 
 const progressElem = document.getElementById('progress')
@@ -87,7 +99,7 @@ const play = () => {
         if (currentTick > end) return
 
         const delta = currentTick - midiEvent.tick
-        const cnvs = PROGRAMS[program.name].run({ height: canvas.height, width: canvas.width, delta, ...program.params })
+        const cnvs = Programs.run(program.name, { height: canvas.height, width: canvas.width, delta, ...program.params })
 
         if (!program.columns.length) return ctx.drawImage(cnvs, 0, 0)
         for (let i=0; i<program.columns.length; i++) {
@@ -131,9 +143,6 @@ const showExportDialog = () => {
 
 const exportVideo = (outputPath) => {
   console.log('clearing frames')
-  if (!fs.existsSync('./tmp')) {
-    fs.mkdirSync('./tmp')
-  }
   rimraf.sync('tmp/*')
 
   let f = 0
@@ -156,7 +165,7 @@ const exportVideo = (outputPath) => {
         if (f > end) return
 
         const delta = f - midiEvent.tick
-        const cnvs = PROGRAMS[program.name].run({ delta, ...program.params, height: canvas.height, width: canvas.width })
+        const cnvs = Programs.run(program.name, { delta, ...program.params, height: canvas.height, width: canvas.width })
 
         if (!program.columns.length) return ctx.drawImage(cnvs, 0, 0)
         for (let i=0; i<program.columns.length; i++) {
@@ -252,6 +261,25 @@ const loadJSON = () => {
         renderApp({ Player })
       })
       Player.loadFile(Project.midiFile)
+
+      if (Project.programs.length) Programs.load(Project.programs)
+    }
+  })
+}
+
+const showProgramDialog = () => {
+  dialog.showOpenDialog({
+    title: 'Load MOV File',
+    message: 'select a .mov file',
+    properties: ['openFile'],
+    filters: [
+      { name: 'MOV', extensions: ['mov'] }
+    ]
+  }, async (files) => {
+    if (files !== undefined) {
+      const file = files[0]
+      Project.programs.push(file)
+      Programs.load(Project.programs)
     }
   })
 }
@@ -261,3 +289,4 @@ document.querySelector('#loadMidi').addEventListener('click', loadMidi)
 document.querySelector('#loadJSON').addEventListener('click', loadJSON)
 document.querySelector('#save').addEventListener('click', save)
 document.querySelector('#export').addEventListener('click', showExportDialog)
+document.querySelector('#loadProgram').addEventListener('click', showProgramDialog)
