@@ -24,9 +24,15 @@ const renderProgramParam = ({ label, inputElem, parent }) => {
   parent.appendChild(programParamContainer)
 }
 
+const clearSelectedMeasure = () => {
+  const elem = document.querySelector('.measure.selected')
+  if (elem) elem.className = 'measure'
+}
+
 module.exports = {
   clearNoteActive,
   clearProgramActive,
   clearProgramParams,
+  clearSelectedMeasure,
   renderProgramParam
 }

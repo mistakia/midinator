@@ -10,14 +10,6 @@ const load = (file) => {
   })
 }
 
-const stop = () => {
-  if (sound) sound.stop()
-}
-
-const play = () => {
-  if (sound) sound.play()
-}
-
 if (Project.audioFile) {
   load(Project.audioFile)
 }
@@ -25,6 +17,5 @@ if (Project.audioFile) {
 
 module.exports = {
   load,
-  stop,
-  play
+  sound
 }
