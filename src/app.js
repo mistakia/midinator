@@ -219,7 +219,7 @@ const renderApp = () => {
 
     // set program var
     let { programs } = selectedNotes[0]
-    programs = programs.slice(0)
+    programs = JSON.parse(JSON.stringify(programs))
 
     // check if equal
     let matchingPrograms = true
