@@ -5,6 +5,7 @@ const Frame  = require('canvas-to-buffer')
 const rimraf = require('rimraf')
 const ffmpeg = require('fluent-ffmpeg')
 const jsonfile = require('jsonfile')
+const userPrompt = require('electron-osx-prompt')
 
 const { dialog, getCurrentWindow } = require('electron').remote
 const win = getCurrentWindow()
@@ -309,6 +310,18 @@ const stop = () => {
   document.querySelector('#play').innerHTML = 'Play'
 }
 
+const setTempo = () => {
+  userPrompt('Set Tempo', '120').then(input => {
+    if (input) {
+      const player = getPlayer()
+      player.setTempo(parseInt(input, 10))
+      document.getElementById('tempo').innerHTML = `Tempo: ${player.tempo}`
+    }
+  }).catch(err => {
+    console.log(err)
+  })
+}
+
 document.querySelector('#play').addEventListener('click', play)
 document.querySelector('#stop').addEventListener('click', stop)
 document.querySelector('#loadMidi').addEventListener('click', loadMidiFile)
@@ -317,3 +330,4 @@ document.querySelector('#save').addEventListener('click', save)
 document.querySelector('#export').addEventListener('click', showExportDialog)
 document.querySelector('#loadProgram').addEventListener('click', showProgramDialog)
 document.querySelector('#loadAudio').addEventListener('click', loadAudio)
+document.querySelector('#setTempo').addEventListener('click', setTempo)
