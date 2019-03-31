@@ -266,7 +266,8 @@ const setPosition = (measure) => {
   player.skipToTick(tick)
   const totalTime = player.getSongTime()
   const timeRemaining = player.getSongTimeRemaining()
-  Audio.sound.seek(totalTime - timeRemaining)
+  const audio = Audio.getPlayer()
+  audio.seek(totalTime - timeRemaining)
 }
 
 module.exports = {
