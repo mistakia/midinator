@@ -16,6 +16,7 @@ let Project = require('./project')
 const Audio = require('./audio')
 let { getPlayer } = require('./player')
 let selectedNotes = []
+let clipboard = []
 
 const getNoteElem = (byteIndex) => document.querySelector(`.note[data-byte-index="${byteIndex}"]`)
 const getMidiEvent = (byteIndex) => Project.midiEvents.find(e => e.byteIndex == byteIndex)
@@ -30,6 +31,28 @@ const drawProgramList = (programs) => {
   clearProgramParams()
   const programListElem = document.getElementById('program-list')
   programListElem.innerHTML = ''
+
+  if (programs.length) {
+    const loadElem = document.createElement('div')
+    loadElem.className = 'program-item'
+    loadElem.innerHTML = 'Copy to Clipboard'
+    loadElem.addEventListener('click', () => {
+      const pgs = JSON.parse(JSON.stringify(programs))
+      clipboard.unshift(pgs)
+    })
+    programListElem.appendChild(loadElem)
+  }
+
+  if (clipboard.length) {
+    const importElem = document.createElement('div')
+    importElem.className = 'program-item'
+    importElem.innerHTML = 'Import From Clipboard'
+    importElem.addEventListener('click', () => {
+      programs = JSON.parse(JSON.stringify(clipboard[0]))
+      drawProgramList(programs)
+    })
+    programListElem.appendChild(importElem)
+  }
 
   programs.forEach((p, idx) => {
     const programElem = document.createElement('div')
