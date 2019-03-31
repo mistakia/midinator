@@ -8,7 +8,8 @@ let Programs = {
   _index: {
     'fade': require('./fade'),
     'fill': require('./fill'),
-    'slide': require('./slide')
+    'slide': require('./slide'),
+    'solid': require('./solid')
   }
 }
 
