@@ -64,10 +64,11 @@ const loadMidiFile = () => {
 const play = () => {
   clearSelectedMeasure()
   const player = getPlayer()
+  const audio = Audio.getPlayer()
   if (!player) return
   if (player.isPlaying()) {
     player.pause()
-    Audio.sound.pause()
+    audio.pause()
     const elem = document.getElementById('current-position')
     if (elem.parentNode) elem.parentNode.removeChild(elem)
     return document.querySelector('#play').innerHTML = 'Play'
@@ -125,7 +126,7 @@ const play = () => {
   player.on('playing', (tick) => currentTick = tick.tick)
 
   player.play()
-  Audio.sound.play()
+  audio.play()
   document.querySelector('#play').innerHTML = 'Pause'
   window.requestAnimationFrame(animate)
 }
@@ -305,8 +306,9 @@ const loadAudio = () => {
 
 const stop = () => {
   const player = getPlayer()
+  const audio = Audio.getPlayer()
   player.stop()
-  Audio.sound.stop()
+  audio.stop()
   document.querySelector('#play').innerHTML = 'Play'
 }
 
