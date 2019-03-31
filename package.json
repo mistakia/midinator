@@ -14,6 +14,7 @@
   "dependencies": {
     "canvas-to-buffer": "^1.0.14",
     "d3-ease": "^1.0.5",
+    "electron-osx-prompt": "^1.4.1",
     "fluent-ffmpeg": "^2.1.2",
     "howler": "^2.1.1",
     "jsonfile": "^5.0.0",
