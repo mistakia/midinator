@@ -190,6 +190,7 @@ const exportVideo = (outputPath) => {
     const frame = new Frame(canvas, { quality: 1, image: { types: ['png'] }})
     fs.writeFileSync('tmp/' + leftpad(f, 5) + '.png', frame.toBuffer())
 
+    const player = getPlayer()
     if (f < player.totalTicks) {
       const percent = `${Math.round(f/player.totalTicks * 100)}`
 
