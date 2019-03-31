@@ -21,7 +21,6 @@ canvas {
 
 #preview-section {
     flex: 0 0 auto;
-    height: 200px;
     width: 100%;
 }
 
@@ -83,7 +82,7 @@ progress[value]::-webkit-progress-value {
 
 #canvas {
     position: relative;
-    width: 600px;
+    height: 230px;
     display: block;
     margin: 0 auto;
 }
@@ -163,9 +162,8 @@ progress[value]::-webkit-progress-value {
     position: relative;
     background: #fafafa;
     max-width: 50%;
-    padding: 15px;
+    padding: 10px;
     display: flex;
-    flex-wrap: wrap;
     overflow-y: scroll;
 }
 
@@ -212,6 +210,27 @@ progress[value]::-webkit-progress-value {
     bottom: 0;
     background-color: #FF0000;
     width: 2px;
+}
+
+.params-list {
+    flex: 1 0 50%;
+}
+
+.column-container {
+    flex: 1 0 50%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.column {
+    flex: 0 1 24%;
+    height: 31px;
+    border: 1px solid black;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.column.active {
+    background-color: rgba(255,255,255,1);
 }
 
 /****************** close ******************/

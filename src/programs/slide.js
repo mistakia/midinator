@@ -34,7 +34,7 @@ const run = ({ delta, color, length, ease, brightness, stroke, reverse, width, h
   const max = canvas.height + stroke
   const y = (easeValue * max) - stroke
   ctx.fillStyle = `rgba(${color},${brightness})`
-  ctx.fillRect(0, y, 600, stroke)
+  ctx.fillRect(0, y, canvas.width, stroke)
 
   return canvas
 }

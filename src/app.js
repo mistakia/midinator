@@ -11,6 +11,7 @@ const {
 } = require('./utils')
 
 const LENGTH_DEFAULT = 10
+const config = require('../config')
 
 let Project = require('./project')
 const Audio = require('./audio')
@@ -88,10 +89,14 @@ const drawProgramList = (programs) => {
       const programParamElem = document.getElementById('program-params')
       programParamElem.innerHTML = ''
 
+      const paramsListElem = document.createElement('div')
+      paramsListElem.className = 'params-list'
+      programParamElem.appendChild(paramsListElem)
+
       const programName = select.value
       Programs.renderParams(programName, {
         params: p.params,
-        parent: programParamElem
+        parent: paramsListElem
       })
 
       const easeSelectLabel = document.createElement('label')
@@ -109,21 +114,31 @@ const drawProgramList = (programs) => {
       renderProgramParam({
         label: 'Easing:',
         inputElem: easeSelect,
-        parent: programParamElem
+        parent: paramsListElem
       })
 
-      const columnInput = document.createElement('input')
-      columnInput.value = p.columns.length ? p.columns.toString() : ''
-      columnInput.oninput = () => {
-        const values = JSON.parse('[' + columnInput.value + ']')
-        //TODO: validate
-        p.columns = values
+      const columnInputs = document.createElement('div')
+      columnInputs.className = 'column-container'
+      let i=1
+      console.log(p.columns)
+      for (let i=1; i < (config.ledstrips + 1); i++) {
+        const columnInput = document.createElement('div')
+        columnInput.className = 'column'
+        if (p.columns[i]) columnInput.classList.add('active')
+
+        columnInput.addEventListener('click', (event) => {
+          console.log(event)
+          if (p.columns[i]) {
+            delete p.columns[i]
+            columnInput.classList.remove('active')
+          } else {
+            p.columns[i] = true
+            columnInput.classList.add('active')
+          }
+        })
+        columnInputs.appendChild(columnInput)
       }
-      renderProgramParam({
-        label: 'Columns:',
-        inputElem: columnInput,
-        parent: programParamElem
-      })
+      programParamElem.appendChild(columnInputs)
 
       const canvas = document.getElementById('preview')
       const ctx = canvas.getContext('2d')
@@ -167,7 +182,7 @@ const drawProgramList = (programs) => {
         elem.classList.add('not-empty')
       })
     }
-    programs.push({ name: firstProgram, params: { length: LENGTH_DEFAULT }, columns: [] })
+    programs.push({ name: firstProgram, params: { length: LENGTH_DEFAULT }, columns: {} })
     drawProgramList(programs)
   })
   programListElem.appendChild(addProgramElem)
@@ -290,7 +305,7 @@ const setPosition = (measure) => {
   const totalTime = player.getSongTime()
   const timeRemaining = player.getSongTimeRemaining()
   const audio = Audio.getPlayer()
-  audio.seek(totalTime - timeRemaining)
+  if (audio) audio.seek(totalTime - timeRemaining)
 }
 
 module.exports = {

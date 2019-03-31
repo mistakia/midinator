@@ -30,7 +30,7 @@ const run = ({ delta, color, length, ease, reverse, width, height }) => {
 
   if (easeValue <= 0) return canvas
   ctx.fillStyle = `rgba(${color},${easeValue})`
-  ctx.fillRect(0, 0, 600, 200)
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
 
   return canvas
 }

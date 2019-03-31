@@ -28,7 +28,7 @@ const run = ({ delta, color, length, ease, brightness, width, height }) => {
 
   const rectHeight = Math.floor(easeValue * canvas.height)
   ctx.fillStyle = `rgba(${color},${brightness})`
-  ctx.fillRect(0,0, 600, rectHeight)
+  ctx.fillRect(0,0, canvas.width, rectHeight)
 
   return canvas
 }

@@ -10,13 +10,15 @@ const userPrompt = require('electron-osx-prompt')
 const { dialog, getCurrentWindow } = require('electron').remote
 const win = getCurrentWindow()
 
+const config = require('./config')
 let Programs = require('./src/programs')
 const { renderApp } = require('./src/app')
-
 const { clearSelectedMeasure } = require('./src/utils')
 let { getPlayer, loadMidiPlayer } = require('./src/player')
 let Project = require('./src/project')
 let Audio = require('./src/audio')
+
+const columnWidth = config.videoWidth / config.ledstrips
 
 if (Project.midiFile) {
   loadMidiPlayer(Project.midiFile)
@@ -39,8 +41,8 @@ const progressElem = document.getElementById('progress')
 const timeline = document.getElementById('timeline')
 const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
-canvas.width = 600
-canvas.height = 200
+canvas.width = config.videoWidth
+canvas.height = config.videoHeight
 
 const loadMidiFile = () => {
   dialog.showOpenDialog({
@@ -68,7 +70,7 @@ const play = () => {
   if (!player) return
   if (player.isPlaying()) {
     player.pause()
-    audio.pause()
+    if (audio) audio.pause()
     const elem = document.getElementById('current-position')
     if (elem.parentNode) elem.parentNode.removeChild(elem)
     return document.querySelector('#play').innerHTML = 'Play'
@@ -105,15 +107,17 @@ const play = () => {
         const delta = currentTick - midiEvent.tick
         const cnvs = Programs.run(program.name, { height: canvas.height, width: canvas.width, delta, ...program.params })
 
-        if (!program.columns.length) return ctx.drawImage(cnvs, 0, 0)
-        for (let i=0; i<program.columns.length; i++) {
-          const column = program.columns[i]
-          const sx = (column * 100) - 100
+        const columns = Object.keys(program.columns).map(c => parseInt(c, 10))
+        if (!columns.length) return ctx.drawImage(cnvs, 0, 0)
+        for (let i=0; i < columns.length; i++) {
+          const column = columns[i]
+          const sx = (column * columnWidth) - columnWidth
           const sy = 0
-          const columnWidth = 100
-          const columnHeight = 200
+          const columnHeight = config.videoHeight
           const dx = sx
           const dy = sy
+          console.log(`${cnvs.width}, ${cnvs.height}`)
+          console.log(`${sx}, ${sy}, ${columnWidth}, ${columnHeight}`)
           ctx.drawImage(
             cnvs, sx, sy, columnWidth, columnHeight,
             dx, dy, columnWidth, columnHeight
@@ -126,7 +130,7 @@ const play = () => {
   player.on('playing', (tick) => currentTick = tick.tick)
 
   player.play()
-  audio.play()
+  if (audio) audio.play()
   document.querySelector('#play').innerHTML = 'Pause'
   window.requestAnimationFrame(animate)
 }
@@ -170,13 +174,13 @@ const exportVideo = (outputPath) => {
         const delta = f - midiEvent.tick
         const cnvs = Programs.run(program.name, { delta, ...program.params, height: canvas.height, width: canvas.width })
 
-        if (!program.columns.length) return ctx.drawImage(cnvs, 0, 0)
-        for (let i=0; i<program.columns.length; i++) {
-          const column = program.columns[i]
-          const sx = (column * 100) - 100
+        const columns = Object.keys(program.columns).map(c => parseInt(c, 10))
+        if (!columns.length) return ctx.drawImage(cnvs, 0, 0)
+        for (let i=0; i < columns.length; i++) {
+          const column = columns[i]
+          const sx = (column * columnWidth) - columnWidth
           const sy = 0
-          const columnWidth = 100
-          const columnHeight = 200
+          const columnHeight = config.videoHeight
           const dx = sx
           const dy = sy
           ctx.drawImage(
@@ -309,7 +313,7 @@ const stop = () => {
   const player = getPlayer()
   const audio = Audio.getPlayer()
   player.stop()
-  audio.stop()
+  if (audio) audio.stop()
   document.querySelector('#play').innerHTML = 'Play'
 }
 
