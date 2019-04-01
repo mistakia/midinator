@@ -53,6 +53,13 @@ const drawProgramList = (programs) => {
     importElem.innerHTML = 'Import From Clipboard'
     importElem.addEventListener('click', () => {
       programs = JSON.parse(JSON.stringify(clipboard[0]))
+      selectedNotes.forEach((note) => {
+        if (programs.length) {
+          const elem = getNoteElem(note.byteIndex)
+          elem.classList.add('not-empty')
+        }
+        note.programs = programs
+      })
       drawProgramList(programs)
     })
     programListElem.appendChild(importElem)
