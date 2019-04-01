@@ -12,6 +12,7 @@
     "nodemon": "^1.18.10"
   },
   "dependencies": {
+    "@simonwep/pickr": "^0.4.4",
     "canvas-to-buffer": "^1.0.14",
     "d3-ease": "^1.0.5",
     "electron-osx-prompt": "^1.4.1",

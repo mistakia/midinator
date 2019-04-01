@@ -6,22 +6,21 @@ const canvas = document.createElement('canvas')
 const ctx = canvas.getContext('2d')
 
 const STROKE_DEFAULT = 5
+const COLOR_DEFAULT = 'rgba(255,255,255,1)'
 const LENGTH_DEFAULT = 10
-const COLOR_DEFAULT = '255,255,255'
 const EASE_DEFAULT = 'easeLinear'
 const REVERSE_DEFAULT = false
 
-const run = ({ delta, color, length, ease, brightness, stroke, reverse, width, height }) => {
+const run = ({ delta, color, length, ease, stroke, reverse, width, height }) => {
   canvas.width = width
   canvas.height = height
 
   //TODO: validate params
-  color = color || COLOR_DEFAULT
-  brightness = brightness || 1
   length = length || LENGTH_DEFAULT
   ease = ease || EASE_DEFAULT
   stroke = stroke || STROKE_DEFAULT
   reverse = reverse || REVERSE_DEFAULT
+  color = color || COLOR_DEFAULT
 
   const easeFn = eases[ease]
   const t = delta / length
@@ -33,20 +32,13 @@ const run = ({ delta, color, length, ease, brightness, stroke, reverse, width, h
 
   const max = canvas.height + stroke
   const y = (easeValue * max) - stroke
-  ctx.fillStyle = `rgba(${color},${brightness})`
+  ctx.fillStyle = color
   ctx.fillRect(0, y, canvas.width, stroke)
 
   return canvas
 }
 
 const renderParams = ({ params, parent }) => {
-  const colorInput = document.createElement('input')
-  colorInput.value = params.color || COLOR_DEFAULT
-  colorInput.oninput = () => {
-    params.color = colorInput.value
-  }
-  renderProgramParam({ label: 'Color:', inputElem: colorInput, parent })
-
   const lengthInput = document.createElement('input')
   lengthInput.value = params.length || LENGTH_DEFAULT
   lengthInput.oninput = () => {

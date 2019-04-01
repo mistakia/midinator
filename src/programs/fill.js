@@ -9,13 +9,11 @@ const COLOR_DEFAULT = '255,255,255'
 const LENGTH_DEFAULT = 10
 const EASE_DEFAULT = 'easeLinear'
 
-const run = ({ delta, color, length, ease, brightness, width, height }) => {
+const run = ({ delta, color, length, ease, width, height }) => {
   canvas.width = width
   canvas.height = height
 
   //TODO: validate params
-  color = color || COLOR_DEFAULT
-  brightness = brightness || 1
   length = length || LENGTH_DEFAULT
   ease = ease || EASE_DEFAULT
 
@@ -27,20 +25,20 @@ const run = ({ delta, color, length, ease, brightness, width, height }) => {
   const easeValue = easeFn(t)
 
   const rectHeight = Math.floor(easeValue * canvas.height)
-  ctx.fillStyle = `rgba(${color},${brightness})`
+  ctx.fillStyle = color
   ctx.fillRect(0,0, canvas.width, rectHeight)
 
   return canvas
 }
 
 const renderParams = ({ params, parent }) => {
-  const colorInput = document.createElement('input')
-  colorInput.value = params.color || COLOR_DEFAULT
-  colorInput.oninput = () => {
-    params.color = colorInput.value
-  }
-  renderProgramParam({ label: 'Color:', inputElem: colorInput, parent })
-
+  /* const colorInput = document.createElement('input')
+   * colorInput.value = params.color || COLOR_DEFAULT
+   * colorInput.oninput = () => {
+   *   params.color = colorInput.value
+   * }
+   * renderProgramParam({ label: 'Color:', inputElem: colorInput, parent })
+   */
   const lengthInput = document.createElement('input')
   lengthInput.value = params.length || LENGTH_DEFAULT
   lengthInput.oninput = () => {
