@@ -348,10 +348,10 @@ const setPosition = (measure) => {
   if (player.isPlaying()) return
   const tick = (measure - 1) * (player.division * 4)
   player.skipToTick(tick)
-  const totalTime = player.getSongTime()
-  const timeRemaining = player.getSongTimeRemaining()
+  const seconds = tick / player.division / player.tempo * 60
+  console.log(`Seconds: ${seconds}`)
   const audio = Audio.getPlayer()
-  if (audio) audio.seek(totalTime - timeRemaining)
+  if (audio) audio.seek(seconds)
 }
 
 module.exports = {
