@@ -120,8 +120,6 @@ const play = () => {
           const columnHeight = config.videoHeight
           const dx = sx
           const dy = sy
-          console.log(`${cnvs.width}, ${cnvs.height}`)
-          console.log(`${sx}, ${sy}, ${columnWidth}, ${columnHeight}`)
           ctx.drawImage(
             cnvs, sx, sy, columnWidth, columnHeight,
             dx, dy, columnWidth, columnHeight

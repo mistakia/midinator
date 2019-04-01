@@ -13,6 +13,7 @@ const {
 
 const LENGTH_DEFAULT = 10
 const COLOR_DEFAULT = 'rgba(255,255,255,1)'
+const NOISE_DEFAULT = 0
 const config = require('../config')
 
 let Project = require('./project')
@@ -98,10 +99,10 @@ const drawProgramList = (programs) => {
       const colorPickerElem = document.createElement('div')
       colorPickerElem.className = 'params-list'
       paramsListElem.appendChild(colorPickerElem)
-      console.log(p.params.color)
+
       const pickr = Pickr.create({
         el: colorPickerElem,
-        default: p.params.color || COLOR_DEFAULT,
+        default: p.params.color,
         defaultRepresentation: 'RGBA',
         adjustableNumbers: true,
 
@@ -130,8 +131,6 @@ const drawProgramList = (programs) => {
         parent: paramsListElem
       })
 
-      const easeSelectLabel = document.createElement('label')
-      easeSelectLabel.innerHTML = 'Easing:'
       const easeSelect = document.createElement('select')
       Object.keys(eases).forEach((ease) => {
         const option = document.createElement('option')
@@ -145,6 +144,20 @@ const drawProgramList = (programs) => {
       renderProgramParam({
         label: 'Easing:',
         inputElem: easeSelect,
+        parent: paramsListElem
+      })
+
+      const noiseInput = document.createElement('input')
+      noiseInput.type = 'range'
+      noiseInput.min = 0
+      noiseInput.max = 100
+      noiseInput.value = p.params.noise
+      noiseInput.oninput = () => {
+        p.params.noise = parseInt(noiseInput.value, 10)
+      }
+      renderProgramParam({
+        label: 'Noise',
+        inputElem: noiseInput,
         parent: paramsListElem
       })
 
@@ -211,7 +224,11 @@ const drawProgramList = (programs) => {
         elem.classList.add('not-empty')
       })
     }
-    programs.push({ name: firstProgram, params: { length: LENGTH_DEFAULT }, columns: {} })
+    programs.push({ name: firstProgram, params: {
+      length: LENGTH_DEFAULT,
+      color: COLOR_DEFAULT,
+      noise: NOISE_DEFAULT
+    }, columns: {} })
     drawProgramList(programs)
   })
   programListElem.appendChild(addProgramElem)
