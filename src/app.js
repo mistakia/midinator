@@ -1,4 +1,5 @@
 const eases = require('d3-ease')
+const Pickr = require('@simonwep/pickr')
 
 const timeline = document.getElementById('timeline')
 const Programs = require('./programs')
@@ -11,6 +12,7 @@ const {
 } = require('./utils')
 
 const LENGTH_DEFAULT = 10
+const COLOR_DEFAULT = 'rgba(255,255,255,1)'
 const config = require('../config')
 
 let Project = require('./project')
@@ -93,6 +95,35 @@ const drawProgramList = (programs) => {
       paramsListElem.className = 'params-list'
       programParamElem.appendChild(paramsListElem)
 
+      const colorPickerElem = document.createElement('div')
+      colorPickerElem.className = 'params-list'
+      paramsListElem.appendChild(colorPickerElem)
+      console.log(p.params.color)
+      const pickr = Pickr.create({
+        el: colorPickerElem,
+        default: p.params.color || COLOR_DEFAULT,
+        defaultRepresentation: 'RGBA',
+        adjustableNumbers: true,
+
+        components: {
+          // Main components
+          preview: true,
+          opacity: true,
+          hue: true,
+
+          // Input / output Options
+          interaction: {
+            input: true,
+            clear: true,
+            save: true
+          }
+        }
+      })
+
+      pickr.on('save', (hvsa) => {
+        if (hvsa) p.params.color = hvsa.toRGBA().toString()
+      })
+
       const programName = select.value
       Programs.renderParams(programName, {
         params: p.params,
@@ -120,14 +151,12 @@ const drawProgramList = (programs) => {
       const columnInputs = document.createElement('div')
       columnInputs.className = 'column-container'
       let i=1
-      console.log(p.columns)
       for (let i=1; i < (config.ledstrips + 1); i++) {
         const columnInput = document.createElement('div')
         columnInput.className = 'column'
         if (p.columns[i]) columnInput.classList.add('active')
 
         columnInput.addEventListener('click', (event) => {
-          console.log(event)
           if (p.columns[i]) {
             delete p.columns[i]
             columnInput.classList.remove('active')
