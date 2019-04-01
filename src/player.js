@@ -12,7 +12,6 @@ let loadMidiPlayer = (file, onLoaded) => {
     Player.on('fileLoaded', onLoaded)
   }
   Player.loadFile(file)
-  console.log(Player)
 }
 
 module.exports = {

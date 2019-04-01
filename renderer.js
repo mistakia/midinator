@@ -22,6 +22,10 @@ const columnWidth = config.videoWidth / config.ledstrips
 
 if (Project.midiFile) {
   loadMidiPlayer(Project.midiFile)
+  if (Project.tempo) {
+    const player = getPlayer()
+    player.setTempo(Project.tempo)
+  }
   renderApp()
 }
 
@@ -321,7 +325,9 @@ const setTempo = () => {
   userPrompt('Set Tempo', '120').then(input => {
     if (input) {
       const player = getPlayer()
-      player.setTempo(parseInt(input, 10))
+      const tempo = parseInt(input, 10)
+      Project.tempo = tempo
+      player.setTempo(tempo)
       document.getElementById('tempo').innerHTML = `Tempo: ${player.tempo}`
     }
   }).catch(err => {

@@ -7,6 +7,7 @@ let Project = {
   midiFile: '',
   audioFile: '',
   midiEvents: [],
+  tempo: null,
   programs: []
 }
 
