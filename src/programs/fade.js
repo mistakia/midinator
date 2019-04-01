@@ -1,6 +1,7 @@
 const eases = require('d3-ease')
 
 const { renderProgramParam } = require('../utils')
+const { noiseEffect } = require('../effects')
 
 const canvas = document.createElement('canvas')
 const ctx = canvas.getContext('2d')
@@ -10,7 +11,7 @@ const EASE_DEFAULT = 'easeLinear'
 const REVERSE_DEFAULT = false
 const COLOR_DEFAULT = 'rgba(255,255,255,1)'
 
-const run = ({ delta, color, length, ease, reverse, width, height }) => {
+const run = ({ delta, color, length, ease, reverse, width, height, noise }) => {
   canvas.width = width
   canvas.height = height
 
@@ -30,8 +31,19 @@ const run = ({ delta, color, length, ease, reverse, width, height }) => {
 
   if (easeValue <= 0) return canvas
   ctx.fillStyle = color.replace(/[^\,)]+\)/, `${easeValue})`) //`rgba(${color},${easeValue})`
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
 
+  if (noise) {
+    noiseEffect({
+      ctx,
+      totalHeight: canvas.height,
+      width: canvas.width,
+      height: canvas.height,
+      noise
+    })
+    return canvas
+  }
+
+  ctx.fillRect(0, 0, canvas.width, canvas.height, noise)
   return canvas
 }
 
