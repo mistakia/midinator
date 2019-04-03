@@ -85,7 +85,7 @@ class Program {
     const img = this.images[frame]
     if (!img) return canvas
 
-    ctx.drawImage(img, 0, 0, 100, 100 * img.height / img.width)
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
     return canvas
   }
 
