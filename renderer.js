@@ -13,12 +13,13 @@ const win = getCurrentWindow()
 const config = require('./config')
 let Programs = require('./src/programs')
 const { renderApp } = require('./src/app')
+const { renderColumns, getColumns } = require('./src/columns')
 const { clearSelectedMeasure } = require('./src/utils')
 let { getPlayer, loadMidiPlayer } = require('./src/player')
 let Project = require('./src/project')
 let Audio = require('./src/audio')
 
-const columnWidth = config.videoWidth / config.ledstrips
+const columnWidth = config.videoWidth / config.totalColumns
 
 if (Project.midiFile) {
   loadMidiPlayer(Project.midiFile)
@@ -109,22 +110,16 @@ const play = () => {
         if (currentTick > end) return
 
         const delta = currentTick - midiEvent.tick
-        const cnvs = Programs.run(program.name, { height: canvas.height, width: canvas.width, delta, ...program.params })
+        const cnvs = Programs.run(program.name, {
+          height: canvas.height,
+          width: canvas.width,
+          delta,
+          ...program.params
+        })
 
-        const columns = Object.keys(program.columns).map(c => parseInt(c, 10))
+        const columns = getColumns({ delta, ...program.columnParams, ...program.params })
         if (!columns.length) return ctx.drawImage(cnvs, 0, 0)
-        for (let i=0; i < columns.length; i++) {
-          const column = columns[i]
-          const sx = (column * columnWidth) - columnWidth
-          const sy = 0
-          const columnHeight = config.videoHeight
-          const dx = sx
-          const dy = sy
-          ctx.drawImage(
-            cnvs, sx, sy, columnWidth, columnHeight,
-            dx, dy, columnWidth, columnHeight
-          )
-        }
+        renderColumns({ cnvs, ctx, columns })
       })
     }
   }
@@ -174,22 +169,16 @@ const exportVideo = (outputPath) => {
         if (f > end) return
 
         const delta = f - midiEvent.tick
-        const cnvs = Programs.run(program.name, { delta, ...program.params, height: canvas.height, width: canvas.width })
+        const cnvs = Programs.run(program.name, {
+          height: canvas.height,
+          width: canvas.width,
+          delta,
+          ...program.params
+        })
 
-        const columns = Object.keys(program.columns).map(c => parseInt(c, 10))
+        const columns = getColumns({ delta, ...program.columnParams, ...program.params })
         if (!columns.length) return ctx.drawImage(cnvs, 0, 0)
-        for (let i=0; i < columns.length; i++) {
-          const column = columns[i]
-          const sx = (column * columnWidth) - columnWidth
-          const sy = 0
-          const columnHeight = config.videoHeight
-          const dx = sx
-          const dy = sy
-          ctx.drawImage(
-            cnvs, sx, sy, columnWidth, columnHeight,
-            dx, dy, columnWidth, columnHeight
-          )
-        }
+        renderColumns({ cnvs, ctx, columns })
       })
     }
 

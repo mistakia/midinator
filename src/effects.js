@@ -2,7 +2,7 @@ const config = require('../config')
 
 const noiseEffect = ({ ctx, totalHeight, width, height, noise, startY }) => {
   const ledHeight = totalHeight / config.ledHeight
-  const ledWidth = width / config.ledstrips
+  const ledWidth = width / config.totalColumns
 
   startY = startY || 0
 

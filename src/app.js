@@ -10,6 +10,7 @@ const {
   clearSelectedMeasure,
   renderProgramParam
 } = require('./utils')
+const { renderColumnParams } = require('./columns')
 
 const LENGTH_DEFAULT = 10
 const COLOR_DEFAULT = 'rgba(255,255,255,1)'
@@ -99,6 +100,8 @@ const drawProgramList = (programs) => {
       const programParamElem = document.getElementById('program-params')
       programParamElem.innerHTML = ''
 
+      renderColumnParams({ programParamElem, program: p })
+
       const paramsListElem = document.createElement('div')
       paramsListElem.className = 'params-list'
       programParamElem.appendChild(paramsListElem)
@@ -168,27 +171,6 @@ const drawProgramList = (programs) => {
         parent: paramsListElem
       })
 
-      const columnInputs = document.createElement('div')
-      columnInputs.className = 'column-container'
-      let i=1
-      for (let i=1; i < (config.ledstrips + 1); i++) {
-        const columnInput = document.createElement('div')
-        columnInput.className = 'column'
-        if (p.columns[i]) columnInput.classList.add('active')
-
-        columnInput.addEventListener('click', (event) => {
-          if (p.columns[i]) {
-            delete p.columns[i]
-            columnInput.classList.remove('active')
-          } else {
-            p.columns[i] = true
-            columnInput.classList.add('active')
-          }
-        })
-        columnInputs.appendChild(columnInput)
-      }
-      programParamElem.appendChild(columnInputs)
-
       const canvas = document.getElementById('preview')
       const ctx = canvas.getContext('2d')
       const rect = canvas.parentNode.getBoundingClientRect()
@@ -204,8 +186,12 @@ const drawProgramList = (programs) => {
         else delta += 1
 
         canvas.width = canvas.width
-        const cnvs = Programs.run(programName, { height: canvas.height, width: canvas.width, delta, ...p.params })
-        ctx.drawImage(cnvs, 0, 0)
+        const cnvs = Programs.run(programName, { height: config.videoHeight, width: config.videoWidth, delta, ...p.params })
+        const columnWidth = config.videoWidth / config.totalColumns
+        ctx.drawImage(
+          cnvs, 0, 0, columnWidth, config.videoHeight,
+          0, 0, rect.width, rect.height
+        )
       }
 
       window.requestAnimationFrame(animate)
@@ -231,11 +217,18 @@ const drawProgramList = (programs) => {
         elem.classList.add('not-empty')
       })
     }
-    programs.push({ name: firstProgram, params: {
-      length: LENGTH_DEFAULT,
-      color: COLOR_DEFAULT,
-      noise: NOISE_DEFAULT
-    }, columns: {} })
+    programs.push({
+      name: firstProgram,
+      params: {
+        length: LENGTH_DEFAULT,
+        color: COLOR_DEFAULT,
+        noise: NOISE_DEFAULT
+      },
+      columnParams: {
+        type: 'manual',
+        manualSelections: {}
+      }
+    })
     drawProgramList(programs)
   })
   programListElem.appendChild(addProgramElem)
