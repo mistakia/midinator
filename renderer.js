@@ -111,8 +111,8 @@ const play = () => {
 
         const delta = currentTick - midiEvent.tick
         const cnvs = Programs.run(program.name, {
-          height: canvas.height,
-          width: canvas.width,
+          canvasHeight: canvas.height,
+          canvasWidth: canvas.width,
           delta,
           ...program.params
         })
@@ -170,8 +170,8 @@ const exportVideo = (outputPath) => {
 
         const delta = f - midiEvent.tick
         const cnvs = Programs.run(program.name, {
-          height: canvas.height,
-          width: canvas.width,
+          canvasHeight: canvas.height,
+          canvasWidth: canvas.width,
           delta,
           ...program.params
         })

@@ -4,7 +4,7 @@ const eases = require('d3-ease')
 const ffmpeg = require('fluent-ffmpeg')
 const leftpad = require('leftpad')
 
-const { renderProgramParam } = require('./utils')
+const { renderInput } = require('./utils')
 
 const LENGTH_DEFAULT = 10
 const EASE_DEFAULT = 'easeLinear'
@@ -95,7 +95,7 @@ class Program {
     lengthInput.oninput = () => {
       params.length = parseInt(lengthInput.value, 10)
     }
-    renderProgramParam({ label: 'Length:', inputElem: lengthInput, parent })
+    renderInput({ label: 'Length:', input: lengthInput, parent })
 
     const reverseInput = document.createElement('input')
     reverseInput.type = 'checkbox'
@@ -103,7 +103,7 @@ class Program {
     reverseInput.oninput = () => {
       params.reverse = reverseInput.checked
     }
-    renderProgramParam({ label: 'Reverse:', inputElem: reverseInput, parent })
+    renderInput({ label: 'Reverse:', input: reverseInput, parent })
   }
 }
 
