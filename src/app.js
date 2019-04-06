@@ -21,20 +21,39 @@ const Audio = require('./audio')
 let { getPlayer } = require('./player')
 let selectedNotes = []
 let clipboard = []
+let copySet = []
 
 const getNoteElem = (byteIndex) => document.querySelector(`.note[data-byte-index="${byteIndex}"]`)
 const getMidiEvent = (byteIndex) => Project.midiEvents.find(e => e.byteIndex == byteIndex)
 const getMidiRange = (start, end) => {
-  return Project.midiEvents.filter(e => {
-    if (e.name !== 'Note on') return false
-    return e.byteIndex > start && e.byteIndex < end
-  })
+  let range = []
+  let onNotes = Project.midiEvents.filter(e => e.name === 'Note on')
+  let lastTick
+  for (let i=0; i<onNotes.length; i++) {
+    const note = onNotes[i]
+    if (note.tick > start && note.tick < end && note.tick !== lastTick) {
+      range.push(note)
+      lastTick = note.tick
+    }
+  }
+
+  return range
 }
 
-const drawProgramList = (programs) => {
+const drawProgramList = ({ programs, mismatch }) => {
   clearProgramParams()
   const programListElem = document.getElementById('program-list')
   programListElem.innerHTML = ''
+
+  if (mismatch) {
+    const copySetElem = document.createElement('div')
+    copySetElem.className = 'program-item'
+    copySetElem.innerHTML = 'Copy Set of notes'
+    copySetElem.addEventListener('click', (event) => {
+      copySet = selectedNotes
+    })
+    return programListElem.appendChild(copySetElem)
+  }
 
   if (programs.length) {
     const loadElem = document.createElement('div')
@@ -60,9 +79,39 @@ const drawProgramList = (programs) => {
         }
         note.programs = programs
       })
-      drawProgramList(programs)
+      drawProgramList({ programs })
     })
     programListElem.appendChild(importElem)
+  }
+
+  if (copySet.length && selectedNotes.length == 1) {
+    const pasteSetElem = document.createElement('div')
+    pasteSetElem.className = 'program-item'
+    pasteSetElem.innerHTML = 'Paste Set'
+    pasteSetElem.addEventListener('click', () => {
+      const sortedCopySet = copySet.sort((a, b) => {
+        return a.byteIndex - b.byteIndex
+      })
+
+      let note = selectedNotes[0]
+      const getNextNote = (tick) => Project.midiEvents.find(e => e.name === 'Note on' && e.tick > tick)
+
+      for (let i=0; i < sortedCopySet.length; i++) {
+        const { programs } = sortedCopySet[i]
+        if (programs && programs.length) {
+          note.programs = JSON.parse(JSON.stringify(programs))
+          const elem = getNoteElem(note.byteIndex)
+          elem.classList.add('not-empty')
+        }
+
+        note = getNextNote(note.tick)
+        if (!note) break
+      }
+
+      const { programs } = selectedNotes[0]
+      drawProgramList({ programs })
+    })
+    programListElem.appendChild(pasteSetElem)
   }
 
   programs.forEach((p, idx) => {
@@ -81,7 +130,7 @@ const drawProgramList = (programs) => {
           elem.classList.remove('not-empty')
         })
       }
-      drawProgramList(programs)
+      drawProgramList({ programs })
     })
 
     const programTitleInput = document.createElement('input')
@@ -210,7 +259,7 @@ const drawProgramList = (programs) => {
         manualSelections: {}
       }
     })
-    drawProgramList(programs)
+    drawProgramList({ programs })
   })
   programListElem.appendChild(addProgramElem)
 }
@@ -267,8 +316,8 @@ const renderApp = () => {
     else if (event.shiftKey && selectedNotes.length) {
       const lastNote = selectedNotes[selectedNotes.length - 1]
 
-      const start = Math.min(byteIndex, lastNote.byteIndex)
-      const end = Math.max(byteIndex, lastNote.byteIndex)
+      const start = Math.min(midiEvent.tick, lastNote.tick)
+      const end = Math.max(midiEvent.tick, lastNote.tick)
       const notes = getMidiRange(start, end)
 
       notes.forEach((n) => {
@@ -296,7 +345,9 @@ const renderApp = () => {
       }
     }
 
-    if (!matchingPrograms) programs = []
+    if (!matchingPrograms) {
+      return drawProgramList({ mismatch: true })
+    }
 
     // set selectedNotes to program
     selectedNotes.forEach((note) => {
@@ -306,18 +357,22 @@ const renderApp = () => {
       }
       note.programs = programs
     })
-    drawProgramList(programs)
+    drawProgramList({ programs })
   }
 
   for (let i=1; i<=totalMeasures;i++) {
     drawMeasure(i)
   }
 
+  let lastTick
   for (let i=0; i < Project.midiEvents.length; i++) {
     const midiEvent = Project.midiEvents[i]
     if (midiEvent.name !== 'Note on') continue
     midiEvent.programs = midiEvent.programs || []
-    drawNote(midiEvent)
+    if (midiEvent.tick !== lastTick) {
+      drawNote(midiEvent)
+      lastTick = midiEvent.tick
+    }
   }
 
   const noteElems = document.querySelectorAll('.note')
