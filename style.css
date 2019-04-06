@@ -170,6 +170,12 @@ progress[value]::-webkit-progress-value {
     overflow-y: scroll;
 }
 
+.params-list > select {
+    display: block;
+    margin: 12px;
+    width: 125px;
+}
+
 .params-list > div {
     padding: 12px 15px;
 }

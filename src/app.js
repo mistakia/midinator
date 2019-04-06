@@ -84,13 +84,13 @@ const drawProgramList = (programs) => {
       drawProgramList(programs)
     })
 
-    const select = document.createElement('select')
-    Programs.list().forEach((name) => {
-      const option = document.createElement('option')
-      option.text = name
-      select.add(option)
-    })
-    if (p.name) select.value = p.name
+    const programTitleInput = document.createElement('input')
+    programTitleInput.value = p.name
+    programTitleInput.oninput = (event) => {
+      p.title = programTitleInput.value
+    }
+    if (p.title) programTitleInput.value = p.title
+    programElem.appendChild(programTitleInput)
 
     const drawActiveProgram = () => {
       clearProgramActive()
@@ -104,6 +104,19 @@ const drawProgramList = (programs) => {
       const paramsListElem = document.createElement('div')
       paramsListElem.className = 'params-list'
       programParamElem.appendChild(paramsListElem)
+
+      const programTypeSelect = document.createElement('select')
+      Programs.list().forEach((name) => {
+        const option = document.createElement('option')
+        option.text = name
+        programTypeSelect.add(option)
+      })
+      if (p.name) programTypeSelect.value = p.name
+      programTypeSelect.addEventListener('input', () => {
+        p.name = programTypeSelect.value
+        drawActiveProgram()
+      })
+      paramsListElem.appendChild(programTypeSelect)
 
       const colorPickerElem = document.createElement('div')
       paramsListElem.appendChild(colorPickerElem)
@@ -140,8 +153,7 @@ const drawProgramList = (programs) => {
         if (hvsa) p.params.color = hvsa.toRGBA().toString()
       })
 
-      const programName = select.value
-      Programs.renderParams(programName, {
+      Programs.renderParams(p.name, {
         params: p.params,
         parent: paramsListElem
       })
@@ -161,7 +173,7 @@ const drawProgramList = (programs) => {
         else delta += 1
 
         canvas.width = canvas.width
-        const cnvs = Programs.run(programName, { canvasHeight: config.videoHeight, canvasWidth: config.videoWidth, delta, ...p.params })
+        const cnvs = Programs.run(p.name, { canvasHeight: config.videoHeight, canvasWidth: config.videoWidth, delta, ...p.params })
         const columnWidth = config.videoWidth / config.totalColumns
         ctx.drawImage(
           cnvs, 0, 0, columnWidth, config.videoHeight,
@@ -172,12 +184,7 @@ const drawProgramList = (programs) => {
       window.requestAnimationFrame(animate)
     }
 
-    select.addEventListener('input', () => {
-      p.name = select.value
-      drawActiveProgram()
-    })
     programElem.addEventListener('click', drawActiveProgram)
-    programElem.appendChild(select)
     programListElem.appendChild(programElem)
   })
 
