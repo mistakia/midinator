@@ -126,21 +126,24 @@ progress[value]::-webkit-progress-value {
     height: 50px;
     width: 200px;
     position: relative;
-    margin: 15px 5px;
+    margin: 18px 5px;
     background-color: #f0f0f0;
-    border-left: 10px solid #f00;
+    border: 1px solid #fafafa;
+    background-size: 12.5% 8%;
+    background-image: radial-gradient(circle, #ddd 1px, rgba(0, 0, 0, 0) 1px);
+    background-position: center;
 }
 
 .measure.selected {
-    border-left: 10px solid green;
+    border: 1px solid green;
 }
 
 .measure:before {
     position: absolute;
     font-size: 12px;
-    color: #666;
+    color: #CCC;
     top: -15px;
-    left: -8px;
+    left: 0;
     bottom: 0;
     content: attr(data-measure-number);
 }
@@ -164,6 +167,15 @@ progress[value]::-webkit-progress-value {
 
 .note.active {
     background-color: green;
+}
+
+.note.active:before {
+    position: absolute;
+    font-size: 12px;
+    color: green;
+    bottom: -18px;
+    left: 0;
+    content: attr(data-tick);
 }
 
 #program-list {
