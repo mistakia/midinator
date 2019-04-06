@@ -111,7 +111,6 @@ const renderParams = ({ params, parent }) => {
       ease: 'easeLinear'
     }
   }
-  console.log(params.noise)
   renderParam({
     name: 'Noise',
     min: 0,
