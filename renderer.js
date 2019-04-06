@@ -12,9 +12,8 @@ const win = getCurrentWindow()
 
 const config = require('./config')
 let Programs = require('./src/programs')
-const { renderApp } = require('./src/app')
+const { renderApp, setPosition } = require('./src/app')
 const { renderColumns, getColumns } = require('./src/columns')
-const { clearSelectedMeasure } = require('./src/utils')
 let { getPlayer, loadMidiPlayer } = require('./src/player')
 let Project = require('./src/project')
 let Audio = require('./src/audio')
@@ -69,13 +68,13 @@ const loadMidiFile = () => {
 }
 
 const play = () => {
-  clearSelectedMeasure()
   const player = getPlayer()
   const audio = Audio.getPlayer()
   if (!player) return
   if (player.isPlaying()) {
     player.pause()
     if (audio) audio.pause()
+    setPosition()
     const elem = document.getElementById('current-position')
     if (elem.parentNode) elem.parentNode.removeChild(elem)
     return document.querySelector('#play').innerHTML = 'Play'
@@ -128,7 +127,7 @@ const play = () => {
 
   player.play()
   if (audio) audio.play()
-  document.querySelector('#play').innerHTML = 'Pause'
+  document.querySelector('#play').innerHTML = 'Reset'
   window.requestAnimationFrame(animate)
 }
 
