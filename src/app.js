@@ -1,27 +1,31 @@
 const eases = require('d3-ease')
 const Pickr = require('@simonwep/pickr')
 
-const timeline = document.getElementById('timeline')
 const Programs = require('./programs')
 const {
-  clearProgramActive,
-  clearNoteActive,
-  clearProgramParams,
-  clearSelectedMeasure,
-  renderInput
+  renderInput,
+  resetClassName
 } = require('./utils')
 const { renderColumnParams } = require('./columns')
 
-const LENGTH_DEFAULT = 10
-const COLOR_DEFAULT = 'rgba(255,255,255,1)'
-const config = require('../config')
-
-let Project = require('./project')
+const {
+  getClipboardPrograms,
+  addToClipboard,
+  haveClipboard,
+  renderClipboard
+} = require('./clipboard')
 const Audio = require('./audio')
 let { getPlayer } = require('./player')
+const config = require('../config')
+let Project = require('./project')
+
+const LENGTH_DEFAULT = 10
+const COLOR_DEFAULT = 'rgba(255,255,255,1)'
 let selectedNotes = []
-let clipboard = []
 let copySet = []
+
+const timeline = document.getElementById('timeline')
+const programParamElem = document.getElementById('program-params')
 
 const getNoteElem = (byteIndex) => document.querySelector(`.note[data-byte-index="${byteIndex}"]`)
 const getMidiEvent = (byteIndex) => Project.midiEvents.find(e => e.byteIndex == byteIndex)
@@ -41,7 +45,8 @@ const getMidiRange = (start, end) => {
 }
 
 const drawProgramList = ({ programs, mismatch }) => {
-  clearProgramParams()
+  console.log(programs)
+  programParamElem.innerHTML = ''
   const programListElem = document.getElementById('program-list')
   programListElem.innerHTML = ''
 
@@ -61,25 +66,25 @@ const drawProgramList = ({ programs, mismatch }) => {
     loadElem.innerHTML = 'Copy to Clipboard'
     loadElem.addEventListener('click', () => {
       const pgs = JSON.parse(JSON.stringify(programs))
-      clipboard.unshift(pgs)
+      addToClipboard(pgs)
     })
     programListElem.appendChild(loadElem)
   }
 
-  if (clipboard.length) {
+  if (haveClipboard()) {
     const importElem = document.createElement('div')
     importElem.className = 'program-item'
     importElem.innerHTML = 'Import From Clipboard'
     importElem.addEventListener('click', () => {
-      programs = JSON.parse(JSON.stringify(clipboard[0]))
+      const cp = getClipboardPrograms()
       selectedNotes.forEach((note) => {
         if (programs.length) {
           const elem = getNoteElem(note.byteIndex)
           elem.classList.add('not-empty')
         }
-        note.programs = programs
+        note.programs = note.programs.concat(cp)
       })
-      drawProgramList({ programs })
+      drawProgramList({ programs: selectedNotes[0].programs })
     })
     programListElem.appendChild(importElem)
   }
@@ -142,10 +147,9 @@ const drawProgramList = ({ programs, mismatch }) => {
     programElem.appendChild(programTitleInput)
 
     const drawActiveProgram = () => {
-      clearProgramActive()
+      resetClassName('program-item')
       programElem.classList.add('active')
 
-      const programParamElem = document.getElementById('program-params')
       programParamElem.innerHTML = ''
 
       renderColumnParams({ programParamElem, program: p })
@@ -269,7 +273,7 @@ const drawMeasure = (measureNumber) => {
   elem.className = 'measure'
   elem.dataset.measureNumber = measureNumber
   elem.addEventListener('click', () => {
-    clearSelectedMeasure()
+    resetClassName('measure')
     elem.classList.add('selected')
     setPosition(measureNumber)
   })
@@ -279,6 +283,8 @@ const drawMeasure = (measureNumber) => {
 const renderApp = () => {
   const player = getPlayer()
   timeline.innerHTML = '' //clear timeline
+
+  renderClipboard()
 
   const totalTicks = player.totalTicks
   const measureLength = player.division * 4
@@ -306,9 +312,10 @@ const renderApp = () => {
 
   const loadNote = (event) => {
     event.stopPropagation()
-    if (!event.metaKey && !event.shiftKey) clearNoteActive()
-    clearProgramParams()
+    if (!event.metaKey && !event.shiftKey) resetClassName('note')
+    programParamElem.innerHTML = ''
     event.target.classList.add('active')
+
     const { byteIndex } = event.target.dataset
     const midiEvent = getMidiEvent(byteIndex)
 
