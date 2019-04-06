@@ -307,6 +307,7 @@ const renderApp = () => {
     const position = ((midiEvent.tick % measureLength) / measureLength) * 100
     elem.setAttribute('style', `left: ${position}%;`)
     elem.dataset.byteIndex = midiEvent.byteIndex
+    elem.dataset.tick = midiEvent.tick
     parent.appendChild(elem)
   }
 
