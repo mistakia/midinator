@@ -109,6 +109,17 @@ const renderParam = ({ name, param, parent, min, max, step }) => {
     parent: programParamContainer
   })
 
+  renderInput({
+    label: 'Speed:',
+    value: p.speed,
+    manual: true,
+    oninput: (value) => {
+      param.speed = parseFloat(value)
+    },
+    parent: programParamContainer
+  })
+
+
   parent.appendChild(programParamContainer)
 }
 
