@@ -3,14 +3,9 @@ const Param = require('./param')
 
 const isDefined = (value) => (typeof value !== 'undefined' && value !== null)
 
-const clearNoteActive = () => {
-  const noteElems = document.querySelectorAll('.note')
-  noteElems.forEach((elem) => elem.classList.remove('active'))
-}
-
-const clearProgramActive = () => {
-  const programElems = document.querySelectorAll('.program-item')
-  programElems.forEach((elem) => elem.className = 'program-item')
+const resetClassName = (className) => {
+  const elems = document.querySelectorAll(`.${className}`)
+  elems.forEach((elem) => elem.className = className)
 }
 
 const clearProgramParams = () => {
@@ -86,16 +81,9 @@ const renderParam = ({ name, param, parent, min, max, step }) => {
   parent.appendChild(programParamContainer)
 }
 
-const clearSelectedMeasure = () => {
-  const elem = document.querySelector('.measure.selected')
-  if (elem) elem.className = 'measure'
-}
-
 module.exports = {
-  clearNoteActive,
-  clearProgramActive,
   clearProgramParams,
-  clearSelectedMeasure,
   renderInput,
-  renderParam
+  renderParam,
+  resetClassName
 }

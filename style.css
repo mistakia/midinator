@@ -19,9 +19,25 @@ canvas {
     background-color: black;
 }
 
-#preview-section {
+#top-section {
     flex: 0 0 auto;
     width: 100%;
+    display: flex;
+    height: 230px;
+    overflow: hidden;
+}
+
+#output {
+    flex: 0 0 auto;
+}
+
+#compositions {
+    flex: 1 1 25%;
+}
+
+#clipboard {
+    flex: 1 1 25%;
+    overflow-y: scroll;
 }
 
 #timeline-section {
@@ -261,6 +277,16 @@ label {
 
 .column.active {
     background-color: rgba(255,255,255,1);
+}
+
+.clipboard-item {
+    display: block;
+    padding: 5px 25px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.clipboard-item.selected {
+    background: #fafafa;
 }
 
 /****************** close ******************/
