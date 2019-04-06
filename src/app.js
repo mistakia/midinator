@@ -23,6 +23,7 @@ const LENGTH_DEFAULT = 10
 const COLOR_DEFAULT = 'rgba(255,255,255,1)'
 let selectedNotes = []
 let copySet = []
+let selectedMeasure
 
 const timeline = document.getElementById('timeline')
 const programParamElem = document.getElementById('program-params')
@@ -387,7 +388,7 @@ const renderApp = () => {
   noteElems.forEach((elem) => elem.addEventListener('click', loadNote))
 }
 
-const setPosition = (measure) => {
+const setPosition = (measure = selectedMeasure) => {
   const player = getPlayer()
   if (player.isPlaying()) return
   const tick = (measure - 1) * (player.division * 4)
@@ -396,8 +397,11 @@ const setPosition = (measure) => {
   console.log(`Seconds: ${seconds}`)
   const audio = Audio.getPlayer()
   if (audio) audio.seek(seconds)
+
+  selectedMeasure = measure
 }
 
 module.exports = {
-  renderApp
+  renderApp,
+  setPosition
 }
