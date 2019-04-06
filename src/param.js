@@ -2,12 +2,13 @@ const eases = require('d3-ease')
 
 class Param {
   constructor(args) {
-    let { start, end, ease } = args
+    let { start, end, ease, speed } = args
 
     this.args = args
     this.start = start
     this.end = end
     this.ease = ease
+    this.speed = parseFloat(speed || 1.0)
 
     this.min = Math.min(this.start, this.end)
     this.max = Math.max(this.start, this.end)
@@ -17,7 +18,7 @@ class Param {
 
   getValue(t) {
     const easeFn = eases[this.ease]
-    const easeValue = easeFn(t)
+    const easeValue = easeFn(t * this.speed)
     const value = easeValue * this.range
 
     if (this.direction >= 0) {
