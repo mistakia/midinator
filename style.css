@@ -223,6 +223,24 @@ div.program-param {
     content: attr(data-name);
 }
 
+.param-input {
+    display: flex
+}
+
+.param-input label {
+    flex: 0 0 15%;
+}
+
+.param-input input[type=range] {
+    flex: 0 0 50%;
+    margin: 0 15px;
+}
+
+.param-input input:not([type]) {
+    flex: 0 0 auto;
+    width: 40px;
+}
+
 label {
     margin-right: 5px;
     font-size: 12px;
