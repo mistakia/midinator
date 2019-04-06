@@ -1,61 +1,124 @@
-const { renderProgramParam } = require('../utils')
+const { renderParam } = require('../utils')
 const { noiseEffect } = require('../effects')
+const Param = require('../param')
+const config = require('../../config')
 
 const canvas = document.createElement('canvas')
 const ctx = canvas.getContext('2d')
 
-const LENGTH_DEFAULT = 10
-const STROKE_DEFAULT = 5
-const Y_DEFAULT = 0
 const COLOR_DEFAULT = 'rgba(255,255,255,1)'
 
-const run = ({ delta, length, color, y, stroke, width, height, noise }) => {
-  canvas.width = width
-  canvas.height = height
+const run = ({
+  delta,
+  length,
+  color,
+  y,
+  height,
+  canvasWidth,
+  canvasHeight,
+  noise,
+  opacity
+}) => {
 
-  length = length || LENGTH_DEFAULT
-  stroke = stroke || STROKE_DEFAULT
-  y = y || Y_DEFAULT
+  canvas.width = canvasWidth
+  canvas.height = canvasHeight
+
   color = color || COLOR_DEFAULT
 
-  ctx.fillStyle = color
-  if (noise) {
+  const t = delta / length
+
+  const heightParam = new Param(height)
+  const heightValue = heightParam.getValue(t)
+
+  const yParam = new Param(y)
+  const yValue = yParam.getValue(t)
+
+  const opacityParam = new Param(opacity)
+  const opacityValue = opacityParam.getValue(t)
+
+  const noiseParam = new Param(noise)
+  const noiseValue = noiseParam.getValue(t)
+
+  ctx.fillStyle = color.replace(/[^\,)]+\)/, `${opacityValue})`)
+
+  if (noiseValue) {
     noiseEffect({
       ctx,
-      startY: y,
+      startY: yValue,
       totalHeight: canvas.height,
       width: canvas.width,
-      height: stroke,
-      noise
+      height: heightValue,
+      noise: noiseValue
     })
     return canvas
   }
 
-  ctx.fillRect(0, y, width, stroke)
+  ctx.fillRect(0, yValue, canvasWidth, heightValue)
   return canvas
 }
 
 const renderParams = ({ params, parent }) => {
-  const lengthInput = document.createElement('input')
-  lengthInput.value = params.length || LENGTH_DEFAULT
-  lengthInput.oninput = () => {
-    params.length = parseInt(lengthInput.value, 10)
+  if (!params.height) {
+    params.height = {
+      start: 0,
+      end: config.videoHeight,
+      ease: 'easeBounce'
+    }
   }
-  renderProgramParam({ label: 'Length:', inputElem: lengthInput, parent })
+  renderParam({
+    name: 'Height',
+    param: params.height,
+    min: 0,
+    max: config.videoHeight,
+    parent
+  })
 
-  const strokeInput = document.createElement('input')
-  strokeInput.value = params.stroke || STROKE_DEFAULT
-  strokeInput.oninput = () => {
-    params.stroke = parseInt(strokeInput.value, 10)
+  if (!params.y) {
+    params.y = {
+      start: 0,
+      end: 0,
+      ease: 'easeLinear'
+    }
   }
-  renderProgramParam({ label: 'Stroke:', inputElem: strokeInput, parent })
+  renderParam({
+    name: 'Y Position',
+    min: 0,
+    max: config.videoHeight,
+    param: params.y,
+    parent
+  })
 
-  const yInput = document.createElement('input')
-  yInput.value = params.y || Y_DEFAULT
-  yInput.oninput = () => {
-    params.y = parseInt(yInput.value, 10)
+  if (!params.opacity) {
+    params.opacity = {
+      start: 1,
+      end: 1,
+      ease: 'easeLinear'
+    }
   }
-  renderProgramParam({ label: 'Y:', inputElem: yInput, parent })
+  renderParam({
+    name: 'Opacity',
+    min: 0,
+    max: 1,
+    step: 0.01,
+    param: params.opacity,
+    parent
+  })
+
+  if (!params.noise) {
+    params.noise = {
+      start: 0,
+      end: 0,
+      ease: 'easeLinear'
+    }
+  }
+  console.log(params.noise)
+  renderParam({
+    name: 'Noise',
+    min: 0,
+    max: 100,
+    param: params.noise,
+    parent
+  })
 }
 
 module.exports = {

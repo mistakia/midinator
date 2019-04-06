@@ -8,13 +8,12 @@ const {
   clearNoteActive,
   clearProgramParams,
   clearSelectedMeasure,
-  renderProgramParam
+  renderInput
 } = require('./utils')
 const { renderColumnParams } = require('./columns')
 
 const LENGTH_DEFAULT = 10
 const COLOR_DEFAULT = 'rgba(255,255,255,1)'
-const NOISE_DEFAULT = 0
 const config = require('../config')
 
 let Project = require('./project')
@@ -107,8 +106,14 @@ const drawProgramList = (programs) => {
       programParamElem.appendChild(paramsListElem)
 
       const colorPickerElem = document.createElement('div')
-      colorPickerElem.className = 'params-list'
       paramsListElem.appendChild(colorPickerElem)
+
+      const lengthInput = document.createElement('input')
+      lengthInput.value = p.params.length || LENGTH_DEFAULT
+      lengthInput.oninput = () => {
+        p.params.length = parseInt(lengthInput.value, 10)
+      }
+      renderInput({ label: 'Length:', input: lengthInput, parent: paramsListElem })
 
       const pickr = Pickr.create({
         el: colorPickerElem,
@@ -141,36 +146,6 @@ const drawProgramList = (programs) => {
         parent: paramsListElem
       })
 
-      const easeSelect = document.createElement('select')
-      Object.keys(eases).forEach((ease) => {
-        const option = document.createElement('option')
-        option.text = ease
-        easeSelect.add(option)
-      })
-      if (p.params.ease) easeSelect.value = p.params.ease
-      easeSelect.addEventListener('input', () => {
-        p.params.ease = easeSelect.value
-      })
-      renderProgramParam({
-        label: 'Easing:',
-        inputElem: easeSelect,
-        parent: paramsListElem
-      })
-
-      const noiseInput = document.createElement('input')
-      noiseInput.type = 'range'
-      noiseInput.min = 0
-      noiseInput.max = 100
-      noiseInput.value = p.params.noise
-      noiseInput.oninput = () => {
-        p.params.noise = parseInt(noiseInput.value, 10)
-      }
-      renderProgramParam({
-        label: 'Noise',
-        inputElem: noiseInput,
-        parent: paramsListElem
-      })
-
       const canvas = document.getElementById('preview')
       const ctx = canvas.getContext('2d')
       const rect = canvas.parentNode.getBoundingClientRect()
@@ -186,7 +161,7 @@ const drawProgramList = (programs) => {
         else delta += 1
 
         canvas.width = canvas.width
-        const cnvs = Programs.run(programName, { height: config.videoHeight, width: config.videoWidth, delta, ...p.params })
+        const cnvs = Programs.run(programName, { canvasHeight: config.videoHeight, canvasWidth: config.videoWidth, delta, ...p.params })
         const columnWidth = config.videoWidth / config.totalColumns
         ctx.drawImage(
           cnvs, 0, 0, columnWidth, config.videoHeight,
@@ -222,7 +197,6 @@ const drawProgramList = (programs) => {
       params: {
         length: LENGTH_DEFAULT,
         color: COLOR_DEFAULT,
-        noise: NOISE_DEFAULT
       },
       columnParams: {
         type: 'manual',
