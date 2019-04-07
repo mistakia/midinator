@@ -1,19 +1,17 @@
 const { resetClassName } = require('./utils')
+const ProgramList = require('./program-list')
 
-let clipboard = []
-let selectedIndex = 0
+const clipboard = new ProgramList()
 
-const haveClipboard = () => {
-  return clipboard.length
-}
+const haveClipboard = () => clipboard.length
 
 const getClipboardPrograms = () => {
-  return JSON.parse(JSON.stringify(clipboard[selectedIndex].programs))
+  return JSON.parse(JSON.stringify(clipboard.getSelected()))
 }
 
 const addToClipboard = (v) => {
-  clipboard.unshift({
-    name: `Clipboard #${clipboard.length}`,
+  clipboard.add({
+    name: 'Clipboard #' + clipboard.length,
     programs: v
   })
   renderClipboard()
@@ -24,11 +22,20 @@ const clipboardElem = document.getElementById('clipboard')
 const renderClipboard = () => {
   clipboardElem.innerHTML = ''
 
-  clipboard.forEach((item, idx) => {
+  clipboard.list.forEach((item, idx) => {
     const clipboardItemElem = document.createElement('div')
-    clipboardItemElem.className = 'clipboard-item'
+    clipboardItemElem.className = 'program-item'
 
-    if (idx === selectedIndex) {
+    const removeElem = document.createElement('div')
+    removeElem.className = 'close'
+    clipboardItemElem.appendChild(removeElem)
+    removeElem.addEventListener('click', (event) => {
+      event.stopPropagation()
+      clipboard.remove(idx)
+      renderClipboard()
+    })
+
+    if (idx === clipboard.selectedIndex) {
       clipboardItemElem.classList.add('selected')
     }
 
@@ -39,8 +46,8 @@ const renderClipboard = () => {
     }
     clipboardItemElem.appendChild(nameInput)
     clipboardItemElem.addEventListener('click', () => {
-      selectedIndex = idx
-      resetClassName('clipboard-item')
+      clipboard.setSelected(idx)
+      resetClassName('#clipboard .program-item', 'program-item')
       clipboardItemElem.classList.add('selected')
     })
     clipboardElem.appendChild(clipboardItemElem)
