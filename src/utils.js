@@ -82,7 +82,7 @@ const renderParam = ({ name, param, parent, min, max, step }) => {
     manual: true,
     range: true,
     oninput: (value) => {
-      param.start = parseInt(value, 10)
+      param.start = parseFloat(value)
     },
     parent: programParamContainer
   })
@@ -93,7 +93,7 @@ const renderParam = ({ name, param, parent, min, max, step }) => {
     manual: true,
     range: true,
     oninput: (value) => {
-      param.end = parseInt(value, 10)
+      param.end = parseFloat(value)
     },
     parent: programParamContainer
   })
