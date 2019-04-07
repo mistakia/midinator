@@ -3,6 +3,11 @@ const Param = require('./param')
 
 const isDefined = (value) => (typeof value !== 'undefined' && value !== null)
 
+const removeClassName = (className, selector) => {
+  const elems = document.querySelectorAll(selector || `.${className}`)
+  elems.forEach((elem) => elem.classList.remove(className))
+}
+
 const resetClassName = (className, selector) => {
   const elems = document.querySelectorAll(selector || `.${className}`)
   elems.forEach((elem) => elem.className = className)
@@ -127,5 +132,6 @@ module.exports = {
   clearProgramParams,
   renderInput,
   renderParam,
-  resetClassName
+  resetClassName,
+  removeClassName
 }

@@ -4,7 +4,8 @@ const Pickr = require('@simonwep/pickr')
 const Programs = require('./programs')
 const {
   renderInput,
-  resetClassName
+  resetClassName,
+  removeClassName
 } = require('./utils')
 const { renderColumnParams } = require('./columns')
 
@@ -66,92 +67,6 @@ const drawProgramList = ({ programs, mismatch }) => {
     return programListElem.appendChild(copySetElem)
   }
 
-  if (programs.length) {
-    const addToClipboardElem = document.createElement('div')
-    addToClipboardElem.className = 'program-item'
-    addToClipboardElem.innerHTML = 'Add to Clipboard'
-    addToClipboardElem.addEventListener('click', () => {
-      const pgs = JSON.parse(JSON.stringify(programs))
-      addToClipboard(pgs)
-    })
-    programListElem.appendChild(addToClipboardElem)
-
-    const addToCompositionsElem = document.createElement('div')
-    addToCompositionsElem.className = 'program-item'
-    addToCompositionsElem.innerHTML = 'Add To Compositions'
-    addToCompositionsElem.addEventListener('click', () => {
-      const pgs = JSON.parse(JSON.stringify(programs))
-      addToCompositions(pgs)
-    })
-    programListElem.appendChild(addToCompositionsElem)
-  }
-
-  if (haveCompositions()) {
-    const importCompositionElem = document.createElement('div')
-    importCompositionElem.className = 'program-item'
-    importCompositionElem.innerHTML = 'Import from Compositions'
-    importCompositionElem.addEventListener('click', () => {
-      const cp = getCompositionPrograms()
-      selectedNotes.forEach((note) => {
-        note.programs = note.programs.concat(cp)
-        if (note.programs.length) {
-          const elem = getNoteElem(note.byteIndex)
-          elem.classList.add('not-empty')
-        }
-      })
-      drawProgramList({ programs: selectedNotes[0].programs })
-    })
-    programListElem.appendChild(importCompositionElem)
-  }
-
-  if (haveClipboard()) {
-    const importElem = document.createElement('div')
-    importElem.className = 'program-item'
-    importElem.innerHTML = 'Import From Clipboard'
-    importElem.addEventListener('click', () => {
-      const cp = getClipboardPrograms()
-      selectedNotes.forEach((note) => {
-        note.programs = note.programs.concat(cp)
-        if (note.programs.length) {
-          const elem = getNoteElem(note.byteIndex)
-          elem.classList.add('not-empty')
-        }
-      })
-      drawProgramList({ programs: selectedNotes[0].programs })
-    })
-    programListElem.appendChild(importElem)
-  }
-
-  if (copySet.length && selectedNotes.length == 1) {
-    const pasteSetElem = document.createElement('div')
-    pasteSetElem.className = 'program-item'
-    pasteSetElem.innerHTML = 'Paste Set'
-    pasteSetElem.addEventListener('click', () => {
-      const sortedCopySet = copySet.sort((a, b) => {
-        return a.byteIndex - b.byteIndex
-      })
-
-      let note = selectedNotes[0]
-      const getNextNote = (tick) => Project.midiEvents.find(e => e.name === 'Note on' && e.tick > tick)
-
-      for (let i=0; i < sortedCopySet.length; i++) {
-        const { programs } = sortedCopySet[i]
-        if (programs && programs.length) {
-          note.programs = JSON.parse(JSON.stringify(programs))
-          const elem = getNoteElem(note.byteIndex)
-          elem.classList.add('not-empty')
-        }
-
-        note = getNextNote(note.tick)
-        if (!note) break
-      }
-
-      const { programs } = selectedNotes[0]
-      drawProgramList({ programs })
-    })
-    programListElem.appendChild(pasteSetElem)
-  }
-
   programs.forEach((p, idx) => {
     const programElem = document.createElement('div')
     programElem.className = 'program-item'
@@ -180,7 +95,7 @@ const drawProgramList = ({ programs, mismatch }) => {
     programElem.appendChild(programTitleInput)
 
     const drawActiveProgram = () => {
-      resetClassName('#program-list .program-item', 'program-item')
+      resetClassName('program-item', '#program-list .program-item')
       programElem.classList.add('active')
 
       programParamElem.innerHTML = ''
@@ -299,6 +214,97 @@ const drawProgramList = ({ programs, mismatch }) => {
     drawProgramList({ programs })
   })
   programListElem.appendChild(addProgramElem)
+
+  if (programs.length) {
+    const addToClipboardElem = document.createElement('div')
+    addToClipboardElem.className = 'program-item'
+    addToClipboardElem.innerHTML = 'Add Programs to Clipboard'
+    addToClipboardElem.addEventListener('click', () => {
+      const pgs = JSON.parse(JSON.stringify(programs))
+      addToClipboard(pgs)
+      drawProgramList({ programs })
+    })
+    programListElem.appendChild(addToClipboardElem)
+
+    const addToCompositionsElem = document.createElement('div')
+    addToCompositionsElem.className = 'program-item'
+    addToCompositionsElem.innerHTML = 'Add Programs To Compositions'
+    addToCompositionsElem.addEventListener('click', () => {
+      const pgs = JSON.parse(JSON.stringify(programs))
+      addToCompositions(pgs)
+      drawProgramList({ programs })
+    })
+    programListElem.appendChild(addToCompositionsElem)
+  }
+
+  if (haveCompositions()) {
+    const importCompositionElem = document.createElement('div')
+    importCompositionElem.className = 'program-item'
+    importCompositionElem.id = 'import-compositions'
+    importCompositionElem.innerHTML = 'Import from Compositions'
+    importCompositionElem.addEventListener('click', () => {
+      const cp = getCompositionPrograms()
+      selectedNotes.forEach((note) => {
+        note.programs = note.programs.concat(cp)
+        if (note.programs.length) {
+          const elem = getNoteElem(note.byteIndex)
+          elem.classList.add('not-empty')
+        }
+      })
+      drawProgramList({ programs: selectedNotes[0].programs })
+    })
+    programListElem.appendChild(importCompositionElem)
+  }
+
+  console.log(haveClipboard())
+  if (haveClipboard()) {
+    const importElem = document.createElement('div')
+    importElem.id = 'import-clipboard'
+    importElem.className = 'program-item'
+    importElem.innerHTML = 'Import From Clipboard'
+    importElem.addEventListener('click', () => {
+      const cp = getClipboardPrograms()
+      selectedNotes.forEach((note) => {
+        note.programs = note.programs.concat(cp)
+        if (note.programs.length) {
+          const elem = getNoteElem(note.byteIndex)
+          elem.classList.add('not-empty')
+        }
+      })
+      drawProgramList({ programs: selectedNotes[0].programs })
+    })
+    programListElem.appendChild(importElem)
+  }
+
+  if (copySet.length && selectedNotes.length == 1) {
+    const pasteSetElem = document.createElement('div')
+    pasteSetElem.className = 'program-item'
+    pasteSetElem.innerHTML = 'Paste Set'
+    pasteSetElem.addEventListener('click', () => {
+      const sortedCopySet = copySet.sort((a, b) => {
+        return a.byteIndex - b.byteIndex
+      })
+
+      let note = selectedNotes[0]
+      const getNextNote = (tick) => Project.midiEvents.find(e => e.name === 'Note on' && e.tick > tick)
+
+      for (let i=0; i < sortedCopySet.length; i++) {
+        const { programs } = sortedCopySet[i]
+        if (programs && programs.length) {
+          note.programs = JSON.parse(JSON.stringify(programs))
+          const elem = getNoteElem(note.byteIndex)
+          elem.classList.add('not-empty')
+        }
+
+        note = getNextNote(note.tick)
+        if (!note) break
+      }
+
+      const { programs } = selectedNotes[0]
+      drawProgramList({ programs })
+    })
+    programListElem.appendChild(pasteSetElem)
+  }
 }
 
 const drawMeasure = (measureNumber) => {
@@ -347,7 +353,7 @@ const renderApp = () => {
 
   const loadNote = (event) => {
     event.stopPropagation()
-    if (!event.metaKey && !event.shiftKey) resetClassName('note')
+    if (!event.metaKey && !event.shiftKey) removeClassName('active', '.note.active')
     programParamElem.innerHTML = ''
     event.target.classList.add('active')
 

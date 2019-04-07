@@ -3,7 +3,7 @@ const ProgramList = require('./program-list')
 
 const clipboard = new ProgramList()
 
-const haveClipboard = () => clipboard.length
+const haveClipboard = () => (clipboard.length)
 
 const getClipboardPrograms = () => {
   return JSON.parse(JSON.stringify(clipboard.getSelected()))
@@ -33,6 +33,10 @@ const renderClipboard = () => {
       event.stopPropagation()
       clipboard.remove(idx)
       renderClipboard()
+      if (!clipboard.length) {
+        const elem = document.getElementById('import-clipboard')
+        if (elem) elem.remove()
+      }
     })
 
     if (idx === clipboard.selectedIndex) {
@@ -47,7 +51,7 @@ const renderClipboard = () => {
     clipboardItemElem.appendChild(nameInput)
     clipboardItemElem.addEventListener('click', () => {
       clipboard.setSelected(idx)
-      resetClassName('#clipboard .program-item', 'program-item')
+      resetClassName('program-item', '#clipboard .program-item')
       clipboardItemElem.classList.add('selected')
     })
     clipboardElem.appendChild(clipboardItemElem)
