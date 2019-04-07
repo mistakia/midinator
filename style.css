@@ -10,10 +10,6 @@ main {
     flex-direction: column;
 }
 
-main > section:not(:first-child) {
-    border-top: 3px solid #666;
-}
-
 section {
     background: #fafafa;
 }
@@ -37,12 +33,15 @@ canvas {
 #compositions {
     flex: 1 1 25%;
     background: #fafafa;
+    padding: 25px 10px;
+    overflow-y: scroll;
 }
 
 #clipboard {
     flex: 1 1 25%;
     overflow-y: scroll;
     background: #fafafa;
+    padding: 25px 10px;
 }
 
 #timeline-section {
@@ -61,7 +60,8 @@ canvas {
     justify-content: center;
     align-items: center;
     align-content: center;
-    border-bottom: 1px solid #666;
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
 }
 
 #timeline-controls > div,
@@ -99,7 +99,7 @@ progress[value]::-webkit-progress-value {
     height: 150px;
     display: flex;
     align-content: stretch;
-    border-top: 3px solid #666;
+    border-top: 1px solid #ccc;
 }
 
 #canvas {
@@ -177,7 +177,7 @@ progress[value]::-webkit-progress-value {
     position: relative;
     overflow: hidden;
     overflow-y: scroll;
-    border-right: 1px solid #666;
+    border-right: 1px solid #CCC;
     padding: 1%;
 }
 
