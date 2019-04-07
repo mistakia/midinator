@@ -9,6 +9,12 @@ const {
 const { renderColumnParams } = require('./columns')
 
 const {
+  getCompositionPrograms,
+  addToCompositions,
+  haveCompositions,
+  renderCompositions
+} = require('./compositions')
+const {
   getClipboardPrograms,
   addToClipboard,
   haveClipboard,
@@ -46,7 +52,6 @@ const getMidiRange = (start, end) => {
 }
 
 const drawProgramList = ({ programs, mismatch }) => {
-  console.log(programs)
   programParamElem.innerHTML = ''
   const programListElem = document.getElementById('program-list')
   programListElem.innerHTML = ''
@@ -62,14 +67,41 @@ const drawProgramList = ({ programs, mismatch }) => {
   }
 
   if (programs.length) {
-    const loadElem = document.createElement('div')
-    loadElem.className = 'program-item'
-    loadElem.innerHTML = 'Copy to Clipboard'
-    loadElem.addEventListener('click', () => {
+    const addToClipboardElem = document.createElement('div')
+    addToClipboardElem.className = 'program-item'
+    addToClipboardElem.innerHTML = 'Add to Clipboard'
+    addToClipboardElem.addEventListener('click', () => {
       const pgs = JSON.parse(JSON.stringify(programs))
       addToClipboard(pgs)
     })
-    programListElem.appendChild(loadElem)
+    programListElem.appendChild(addToClipboardElem)
+
+    const addToCompositionsElem = document.createElement('div')
+    addToCompositionsElem.className = 'program-item'
+    addToCompositionsElem.innerHTML = 'Add To Compositions'
+    addToCompositionsElem.addEventListener('click', () => {
+      const pgs = JSON.parse(JSON.stringify(programs))
+      addToCompositions(pgs)
+    })
+    programListElem.appendChild(addToCompositionsElem)
+  }
+
+  if (haveCompositions()) {
+    const importCompositionElem = document.createElement('div')
+    importCompositionElem.className = 'program-item'
+    importCompositionElem.innerHTML = 'Import from Compositions'
+    importCompositionElem.addEventListener('click', () => {
+      const cp = getCompositionPrograms()
+      selectedNotes.forEach((note) => {
+        note.programs = note.programs.concat(cp)
+        if (note.programs.length) {
+          const elem = getNoteElem(note.byteIndex)
+          elem.classList.add('not-empty')
+        }
+      })
+      drawProgramList({ programs: selectedNotes[0].programs })
+    })
+    programListElem.appendChild(importCompositionElem)
   }
 
   if (haveClipboard()) {
@@ -79,11 +111,11 @@ const drawProgramList = ({ programs, mismatch }) => {
     importElem.addEventListener('click', () => {
       const cp = getClipboardPrograms()
       selectedNotes.forEach((note) => {
-        if (programs.length) {
+        note.programs = note.programs.concat(cp)
+        if (note.programs.length) {
           const elem = getNoteElem(note.byteIndex)
           elem.classList.add('not-empty')
         }
-        note.programs = note.programs.concat(cp)
       })
       drawProgramList({ programs: selectedNotes[0].programs })
     })
@@ -148,7 +180,7 @@ const drawProgramList = ({ programs, mismatch }) => {
     programElem.appendChild(programTitleInput)
 
     const drawActiveProgram = () => {
-      resetClassName('program-item')
+      resetClassName('#program-list .program-item', 'program-item')
       programElem.classList.add('active')
 
       programParamElem.innerHTML = ''
@@ -286,6 +318,7 @@ const renderApp = () => {
   timeline.innerHTML = '' //clear timeline
 
   renderClipboard()
+  renderCompositions()
 
   const totalTicks = player.totalTicks
   const measureLength = player.division * 4

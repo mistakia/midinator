@@ -264,6 +264,7 @@ label {
     background: rgba(255,165,0,0.5);
 }
 
+.program-item.selected,
 .program-item.active {
     background: #fafafa;
 }
@@ -307,16 +308,6 @@ label {
 
 .column.active {
     background-color: rgba(255,255,255,1);
-}
-
-.clipboard-item {
-    display: block;
-    padding: 5px 25px;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.clipboard-item.selected {
-    background: #fafafa;
 }
 
 /****************** close ******************/

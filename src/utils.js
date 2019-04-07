@@ -3,8 +3,8 @@ const Param = require('./param')
 
 const isDefined = (value) => (typeof value !== 'undefined' && value !== null)
 
-const resetClassName = (className) => {
-  const elems = document.querySelectorAll(`.${className}`)
+const resetClassName = (className, selector) => {
+  const elems = document.querySelectorAll(selector || `.${className}`)
   elems.forEach((elem) => elem.className = className)
 }
 
