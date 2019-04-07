@@ -52,6 +52,21 @@ const getMidiRange = (start, end) => {
   return range
 }
 
+const renderClearPrograms = ({ parent }) => {
+  const clearProgramsElem = document.createElement('div')
+  clearProgramsElem.className = 'program-item'
+  clearProgramsElem.innerHTML = 'Clear Programs'
+  clearProgramsElem.addEventListener('click', () => {
+    selectedNotes.forEach((note) => {
+      note.programs = []
+      const elem = getNoteElem(note.byteIndex)
+      elem.classList.remove('not-empty')
+    })
+    drawProgramList({ programs: [] })
+  })
+  parent.appendChild(clearProgramsElem)
+}
+
 const drawProgramList = ({ programs, mismatch }) => {
   programParamElem.innerHTML = ''
   const programListElem = document.getElementById('program-list')
@@ -64,7 +79,9 @@ const drawProgramList = ({ programs, mismatch }) => {
     copySetElem.addEventListener('click', (event) => {
       copySet = selectedNotes
     })
-    return programListElem.appendChild(copySetElem)
+    programListElem.appendChild(copySetElem)
+
+    return renderClearPrograms({ parent: programListElem })
   }
 
   programs.forEach((p, idx) => {
@@ -241,18 +258,7 @@ const drawProgramList = ({ programs, mismatch }) => {
 
 
   if (programs.length) {
-    const clearProgramsElem = document.createElement('div')
-    clearProgramsElem.className = 'program-item'
-    clearProgramsElem.innerHTML = 'Clear Programs'
-    clearProgramsElem.addEventListener('click', () => {
-      selectedNotes.forEach((note) => {
-        note.programs = []
-        const elem = getNoteElem(note.byteIndex)
-        elem.classList.remove('not-empty')
-      })
-      drawProgramList({ programs: [] })
-    })
-    programListElem.appendChild(clearProgramsElem)
+    renderClearPrograms({ parent: programListElem })
 
     const addToClipboardElem = document.createElement('div')
     addToClipboardElem.className = 'program-item'
