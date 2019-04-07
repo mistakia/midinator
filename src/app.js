@@ -215,7 +215,21 @@ const drawProgramList = ({ programs, mismatch }) => {
   })
   programListElem.appendChild(addProgramElem)
 
+
   if (programs.length) {
+    const clearProgramsElem = document.createElement('div')
+    clearProgramsElem.className = 'program-item'
+    clearProgramsElem.innerHTML = 'Clear Programs'
+    clearProgramsElem.addEventListener('click', () => {
+      selectedNotes.forEach((note) => {
+        note.programs = []
+        const elem = getNoteElem(note.byteIndex)
+        elem.classList.remove('not-empty')
+      })
+      drawProgramList({ programs: [] })
+    })
+    programListElem.appendChild(clearProgramsElem)
+
     const addToClipboardElem = document.createElement('div')
     addToClipboardElem.className = 'program-item'
     addToClipboardElem.innerHTML = 'Add Programs to Clipboard'
