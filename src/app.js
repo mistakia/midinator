@@ -94,6 +94,30 @@ const drawProgramList = ({ programs, mismatch }) => {
     if (p.title) programTitleInput.value = p.title
     programElem.appendChild(programTitleInput)
 
+    if (idx !== 0) {
+      const up = document.createElement('div')
+      up.className = 'arrow up'
+      programElem.appendChild(up)
+      up.addEventListener('click', (event) => {
+        event.stopPropagation()
+        const to = idx - 1
+        programs.splice(to, 0, programs.splice(idx, 1)[0])
+        drawProgramList({ programs })
+      })
+    }
+
+    if (idx !== (programs.length - 1)) {
+      const down = document.createElement('div')
+      down.className = 'arrow down'
+      programElem.appendChild(down)
+      down.addEventListener('click', (event) => {
+        event.stopPropagation()
+        const to = idx + 1
+        programs.splice(to, 0, programs.splice(idx, 1)[0])
+        drawProgramList({ programs })
+      })
+    }
+
     const drawActiveProgram = () => {
       resetClassName('program-item', '#program-list .program-item')
       programElem.classList.add('active')
@@ -270,7 +294,6 @@ const drawProgramList = ({ programs, mismatch }) => {
     programListElem.appendChild(importCompositionElem)
   }
 
-  console.log(haveClipboard())
   if (haveClipboard()) {
     const importElem = document.createElement('div')
     importElem.id = 'import-clipboard'
