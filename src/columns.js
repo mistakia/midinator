@@ -1,5 +1,4 @@
 const config = require('../config')
-const { renderInput } = require('./utils')
 
 const convertCoordsToColumn = (x, y) => {
   const rows = config.totalColumns / config.columnWidth
@@ -136,11 +135,7 @@ const renderColumnParams = ({ programParamElem, program }) => {
   columnSelect.addEventListener('input', () => {
     columnParams.type = columnSelect.value
   })
-  renderInput({
-    label: '',
-    input: columnSelect,
-    parent: columnParamsElem
-  })
+  columnParamsElem.appendChild(columnSelect)
 
   columnParamsElem.appendChild(columnInputs)
   programParamElem.appendChild(columnParamsElem)
