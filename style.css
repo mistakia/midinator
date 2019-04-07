@@ -10,9 +10,12 @@ main {
     flex-direction: column;
 }
 
-main > section {
-    position: relative;
-    padding-top: 18px;
+main > section:not(:first-child) {
+    border-top: 3px solid #666;
+}
+
+section {
+    background: #fafafa;
 }
 
 canvas {
@@ -33,11 +36,13 @@ canvas {
 
 #compositions {
     flex: 1 1 25%;
+    background: #fafafa;
 }
 
 #clipboard {
     flex: 1 1 25%;
     overflow-y: scroll;
+    background: #fafafa;
 }
 
 #timeline-section {
@@ -56,7 +61,7 @@ canvas {
     justify-content: center;
     align-items: center;
     align-content: center;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid #666;
 }
 
 #timeline-controls > div,
@@ -94,6 +99,7 @@ progress[value]::-webkit-progress-value {
     height: 150px;
     display: flex;
     align-content: stretch;
+    border-top: 3px solid #666;
 }
 
 #canvas {
@@ -103,20 +109,8 @@ progress[value]::-webkit-progress-value {
     margin: 0 auto;
 }
 
-.divider {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 96%;
-    height: 10px;
-    background-color: #f0f0f0;
-    border-top: 1px solid #ccc;
-    display: block;
-    font-size: 10px;
-    padding: 4px 2%;
-}
-
 #timeline {
+    background: white;
     display: flex;
     flex-wrap: wrap;
 }
@@ -183,6 +177,8 @@ progress[value]::-webkit-progress-value {
     position: relative;
     overflow: hidden;
     overflow-y: scroll;
+    border-right: 1px solid #666;
+    padding: 1%;
 }
 
 #program-params {
@@ -254,8 +250,8 @@ label {
 .program-item {
     display: flex;
     font-size: 10px;
-    padding: 4px 10px;
-    border-bottom: 1px solid #fafafa;
+    padding: 5px 10px;
+    border-bottom: 1px solid rgba(150,150,150,0.1);
     cursor: pointer;
     position: relative;
 }
@@ -266,7 +262,7 @@ label {
 
 .program-item.selected,
 .program-item.active {
-    background: #fafafa;
+    background: rgba(60,60,60,0.1);
 }
 
 .program-item select {
@@ -328,7 +324,7 @@ label {
   content: ' ';
   height: 15px;
   width: 2px;
-  background-color: #333;
+  background-color: #666;
 }
 
 .close:before {

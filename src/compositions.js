@@ -37,6 +37,10 @@ const renderCompositions = () => {
       compositions.remove(idx)
       saveCompositions()
       renderCompositions()
+      if (!compositions.length) {
+        const elem = document.getElementById('import-compositions')
+        if (elem) elem.remove()
+      }
     })
 
     if (idx === compositions.selectedIndex) {
@@ -52,7 +56,7 @@ const renderCompositions = () => {
     compositionItemElem.appendChild(nameInput)
     compositionItemElem.addEventListener('click', () => {
       compositions.setSelected(idx)
-      resetClassName('#compositions .program-item', 'program-item')
+      resetClassName('program-item', '#compositions .program-item')
       compositionItemElem.classList.add('selected')
     })
     compositionsElem.appendChild(compositionItemElem)
