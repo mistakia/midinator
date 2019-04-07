@@ -72,11 +72,11 @@ const play = () => {
   const audio = Audio.getPlayer()
   if (!player) return
   if (player.isPlaying()) {
-    player.pause()
-    if (audio) audio.pause()
+    player.stop()
+    if (audio) audio.stop()
     setPosition()
     const elem = document.getElementById('current-position')
-    if (elem.parentNode) elem.parentNode.removeChild(elem)
+    if (elem && elem.parentNode) elem.parentNode.removeChild(elem)
     return document.querySelector('#play').innerHTML = 'Play'
   }
 
@@ -299,14 +299,6 @@ const loadAudio = () => {
   })
 }
 
-const stop = () => {
-  const player = getPlayer()
-  const audio = Audio.getPlayer()
-  player.stop()
-  if (audio) audio.stop()
-  document.querySelector('#play').innerHTML = 'Play'
-}
-
 const setTempo = () => {
   userPrompt('Set Tempo', '120').then(input => {
     if (input) {
@@ -322,7 +314,6 @@ const setTempo = () => {
 }
 
 document.querySelector('#play').addEventListener('click', play)
-document.querySelector('#stop').addEventListener('click', stop)
 document.querySelector('#loadMidi').addEventListener('click', loadMidiFile)
 document.querySelector('#loadJSON').addEventListener('click', loadJSON)
 document.querySelector('#save').addEventListener('click', save)

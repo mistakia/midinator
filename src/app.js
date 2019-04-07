@@ -30,7 +30,7 @@ const LENGTH_DEFAULT = 10
 const COLOR_DEFAULT = 'rgba(255,255,255,1)'
 let selectedNotes = []
 let copySet = []
-let selectedMeasure
+let selectedMeasure = 1
 
 const timeline = document.getElementById('timeline')
 const programParamElem = document.getElementById('program-params')
