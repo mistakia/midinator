@@ -72,36 +72,26 @@ const drawProgramList = ({ programs, mismatch }) => {
   const programListElem = document.getElementById('program-list')
   programListElem.innerHTML = ''
 
-  if (mismatch) {
-    const copySetElem = document.createElement('div')
-    copySetElem.className = 'program-item'
-    copySetElem.innerHTML = 'Copy Set of notes'
-    copySetElem.addEventListener('click', (event) => {
-      copySet = selectedNotes
-    })
-    programListElem.appendChild(copySetElem)
-
-    return renderClearPrograms({ parent: programListElem })
-  }
-
   programs.forEach((p, idx) => {
     const programElem = document.createElement('div')
     programElem.className = 'program-item'
 
-    const remove = document.createElement('div')
-    remove.className = 'close'
-    programElem.appendChild(remove)
-    remove.addEventListener('click', (event) => {
-      event.stopPropagation()
-      programs.splice(idx, 1)
-      if (!programs.length) {
-        selectedNotes.forEach((note) => {
-          const elem = getNoteElem(note.byteIndex)
-          elem.classList.remove('not-empty')
-        })
-      }
-      drawProgramList({ programs })
-    })
+    if (!mismatch) {
+      const remove = document.createElement('div')
+      remove.className = 'close'
+      programElem.appendChild(remove)
+      remove.addEventListener('click', (event) => {
+        event.stopPropagation()
+        programs.splice(idx, 1)
+        if (!programs.length) {
+          selectedNotes.forEach((note) => {
+            const elem = getNoteElem(note.byteIndex)
+            elem.classList.remove('not-empty')
+          })
+        }
+        drawProgramList({ programs })
+      })
+    }
 
     const programTitleInput = document.createElement('input')
     programTitleInput.value = p.name
@@ -111,7 +101,7 @@ const drawProgramList = ({ programs, mismatch }) => {
     if (p.title) programTitleInput.value = p.title
     programElem.appendChild(programTitleInput)
 
-    if (idx !== 0) {
+    if (!mismatch && idx !== 0) {
       const up = document.createElement('div')
       up.className = 'arrow up'
       programElem.appendChild(up)
@@ -123,7 +113,7 @@ const drawProgramList = ({ programs, mismatch }) => {
       })
     }
 
-    if (idx !== (programs.length - 1)) {
+    if (!mismatch && idx !== (programs.length - 1)) {
       const down = document.createElement('div')
       down.className = 'arrow down'
       programElem.appendChild(down)
@@ -230,6 +220,18 @@ const drawProgramList = ({ programs, mismatch }) => {
     programListElem.appendChild(programElem)
   })
 
+  if (mismatch) {
+    const copySetElem = document.createElement('div')
+    copySetElem.className = 'program-item'
+    copySetElem.innerHTML = 'Copy Set of notes'
+    copySetElem.addEventListener('click', (event) => {
+      copySet = selectedNotes
+    })
+    programListElem.appendChild(copySetElem)
+
+    return renderClearPrograms({ parent: programListElem })
+  }
+
   const addProgramElem = document.createElement('div')
   addProgramElem.className = 'program-item'
   addProgramElem.innerHTML = 'Add Program'
@@ -255,7 +257,6 @@ const drawProgramList = ({ programs, mismatch }) => {
     drawProgramList({ programs })
   })
   programListElem.appendChild(addProgramElem)
-
 
   if (programs.length) {
     renderClearPrograms({ parent: programListElem })
@@ -437,7 +438,24 @@ const renderApp = () => {
     }
 
     if (!matchingPrograms) {
-      return drawProgramList({ mismatch: true })
+      let commonProgramNames = programs.map(a => a.title)
+      for (let i=1; i< selectedNotes.length; i++) {
+        let current = selectedNotes[i].programs.map(a => a.title)
+        commonProgramNames = commonProgramNames.filter(a => current.includes(a))
+      }
+
+      let commonPrograms = []
+
+      if (commonProgramNames.length) {
+        commonPrograms = programs.filter(a => commonProgramNames.includes(a.title))
+      }
+
+      selectedNotes.forEach((note) => {
+        const otherPrograms = note.programs.filter(p => !commonProgramNames.includes(p.title))
+        note.programs = otherPrograms.concat(commonPrograms)
+      })
+
+      return drawProgramList({ programs: commonPrograms, mismatch: true })
     }
 
     // set selectedNotes to program
