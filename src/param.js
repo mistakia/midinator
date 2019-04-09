@@ -16,6 +16,19 @@ class Param {
     this.direction = this.end - this.start
   }
 
+  get values () {
+    return {
+      start: this.start,
+      end: this.end,
+      ease: this.ease,
+      speed: this.speed
+    }
+  }
+
+  setValue(name, value) {
+    this[name] = value
+  }
+
   getValue(t) {
     const easeFn = eases[this.ease]
     const easeValue = easeFn(t * this.speed)

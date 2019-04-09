@@ -1,5 +1,6 @@
 const eases = require('d3-ease')
 const Param = require('./param')
+const { getSelectedNotes } = require('./selected-notes')
 
 const isDefined = (value) => (typeof value !== 'undefined' && value !== null)
 
@@ -69,7 +70,7 @@ const renderInput = ({
   parent.appendChild(programParamContainer)
 }
 
-const renderParam = ({ name, param, parent, min, max, step }) => {
+const renderParam = ({ name, param, parent, min, max, step, title }) => {
   const programParamContainer = document.createElement('div')
   programParamContainer.className = 'program-param'
   programParamContainer.dataset.name = name
@@ -82,7 +83,8 @@ const renderParam = ({ name, param, parent, min, max, step }) => {
     manual: true,
     range: true,
     oninput: (value) => {
-      param.start = parseFloat(value)
+      p.setValue('start', parseFloat(value))
+      updateProgramParam({ name, value: p.values, title })
     },
     parent: programParamContainer
   })
@@ -93,7 +95,8 @@ const renderParam = ({ name, param, parent, min, max, step }) => {
     manual: true,
     range: true,
     oninput: (value) => {
-      param.end = parseFloat(value)
+      p.setValue('end', parseFloat(value))
+      updateProgramParam({ name, value: p.values, title })
     },
     parent: programParamContainer
   })
@@ -106,7 +109,8 @@ const renderParam = ({ name, param, parent, min, max, step }) => {
   })
   if (p.ease) easeSelect.value = p.ease
   easeSelect.addEventListener('input', () => {
-    param.ease = easeSelect.value
+    p.setValue('ease', easeSelect.value)
+    updateProgramParam({ name, value: p.values, title })
   })
   renderInput({
     label: 'Ease:',
@@ -119,7 +123,8 @@ const renderParam = ({ name, param, parent, min, max, step }) => {
     value: p.speed,
     manual: true,
     oninput: (value) => {
-      param.speed = parseFloat(value)
+      p.setValue('speed', parseFloat(value))
+      updateProgramParam({ name, value: p.values, title })
     },
     parent: programParamContainer
   })
@@ -128,10 +133,22 @@ const renderParam = ({ name, param, parent, min, max, step }) => {
   parent.appendChild(programParamContainer)
 }
 
+const updateProgramParam = ({ name, value, title }) => {
+  const selectedNotes = getSelectedNotes()
+  selectedNotes.forEach((note, noteIdx) => {
+    note.programs.forEach((p, pIdx) => {
+      if (p.title === title) {
+        p.params[name] = value
+      }
+    })
+  })
+}
+
 module.exports = {
   clearProgramParams,
   renderInput,
   renderParam,
   resetClassName,
-  removeClassName
+  removeClassName,
+  updateProgramParam
 }
