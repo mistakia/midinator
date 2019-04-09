@@ -5,7 +5,8 @@ const Programs = require('./programs')
 const {
   renderInput,
   resetClassName,
-  removeClassName
+  removeClassName,
+  updateProgramParam
 } = require('./utils')
 const { renderColumnParams } = require('./columns')
 
@@ -21,6 +22,11 @@ const {
   haveClipboard,
   renderClipboard
 } = require('./clipboard')
+const {
+  addNoteToSelection,
+  getSelectedNotes,
+  setSelectedNotes
+} = require('./selected-notes')
 const Audio = require('./audio')
 let { getPlayer } = require('./player')
 const config = require('../config')
@@ -28,7 +34,6 @@ let Project = require('./project')
 
 const LENGTH_DEFAULT = 10
 const COLOR_DEFAULT = 'rgba(255,255,255,1)'
-let selectedNotes = []
 let copySet = []
 let selectedMeasure = 1
 
@@ -53,6 +58,7 @@ const getMidiRange = (start, end) => {
 }
 
 const renderClearPrograms = ({ parent }) => {
+  let selectedNotes = getSelectedNotes()
   const clearProgramsElem = document.createElement('div')
   clearProgramsElem.className = 'program-item'
   clearProgramsElem.innerHTML = 'Clear Programs'
@@ -68,6 +74,7 @@ const renderClearPrograms = ({ parent }) => {
 }
 
 const drawProgramList = ({ programs, mismatch }) => {
+  let selectedNotes = getSelectedNotes()
   programParamElem.innerHTML = ''
   const programListElem = document.getElementById('program-list')
   programListElem.innerHTML = ''
@@ -156,7 +163,8 @@ const drawProgramList = ({ programs, mismatch }) => {
       const lengthInput = document.createElement('input')
       lengthInput.value = p.params.length || LENGTH_DEFAULT
       lengthInput.oninput = () => {
-        p.params.length = parseInt(lengthInput.value, 10)
+        const value = parseInt(lengthInput.value, 10)
+        updateProgramParam({ name: 'length', value, title: p.title })
       }
       renderInput({ label: 'Length:', input: lengthInput, parent: paramsListElem })
 
@@ -182,12 +190,16 @@ const drawProgramList = ({ programs, mismatch }) => {
       })
 
       pickr.on('save', (hvsa) => {
-        if (hvsa) p.params.color = hvsa.toRGBA().toString()
+        if (hvsa) {
+          const value = hvsa.toRGBA().toString()
+          updateProgramParam({ name: 'color', value, title: p.title })
+        }
       })
 
       Programs.renderParams(p.name, {
         params: p.params,
-        parent: paramsListElem
+        parent: paramsListElem,
+        title: p.title
       })
 
       const canvas = document.getElementById('preview')
@@ -396,6 +408,7 @@ const renderApp = () => {
   }
 
   const loadNote = (event) => {
+    let selectedNotes = getSelectedNotes()
     event.stopPropagation()
     if (!event.metaKey && !event.shiftKey) removeClassName('active', '.note.active')
     programParamElem.innerHTML = ''
@@ -404,7 +417,7 @@ const renderApp = () => {
     const { byteIndex } = event.target.dataset
     const midiEvent = getMidiEvent(byteIndex)
 
-    if (event.metaKey) selectedNotes.push(midiEvent)
+    if (event.metaKey) addNoteToSelection(midiEvent)
     else if (event.shiftKey && selectedNotes.length) {
       const lastNote = selectedNotes[selectedNotes.length - 1]
 
@@ -417,11 +430,11 @@ const renderApp = () => {
         elem.classList.add('active')
       })
 
-      selectedNotes = selectedNotes.concat(notes)
-      selectedNotes.push(midiEvent)
+      selectedNotes = setSelectedNotes(selectedNotes.concat(notes))
+      addNoteToSelection(midiEvent)
 
       // get all the values in between
-    } else selectedNotes = [midiEvent]
+    } else selectedNotes = setSelectedNotes([midiEvent])
 
     // set program var
     let { programs } = selectedNotes[0]
@@ -450,11 +463,11 @@ const renderApp = () => {
         commonPrograms = programs.filter(a => commonProgramNames.includes(a.title))
       }
 
-      selectedNotes.forEach((note) => {
-        const otherPrograms = note.programs.filter(p => !commonProgramNames.includes(p.title))
-        note.programs = otherPrograms.concat(commonPrograms)
-      })
-
+      /* selectedNotes.forEach((note) => {
+       *   const otherPrograms = note.programs.filter(p => !commonProgramNames.includes(p.title))
+       *   note.programs = otherPrograms.concat(commonPrograms)
+       * })
+       */
       return drawProgramList({ programs: commonPrograms, mismatch: true })
     }
 

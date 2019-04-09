@@ -57,7 +57,7 @@ const run = ({
   return canvas
 }
 
-const renderParams = ({ params, parent }) => {
+const renderParams = ({ params, parent, title }) => {
   if (!params.height) {
     params.height = {
       start: 0,
@@ -66,10 +66,11 @@ const renderParams = ({ params, parent }) => {
     }
   }
   renderParam({
-    name: 'Height',
+    name: 'height',
     param: params.height,
     min: 0,
     max: config.videoHeight,
+    title,
     parent
   })
 
@@ -81,10 +82,11 @@ const renderParams = ({ params, parent }) => {
     }
   }
   renderParam({
-    name: 'Y Position',
+    name: 'y',
     min: 0,
     max: config.videoHeight,
     param: params.y,
+    title,
     parent
   })
 
@@ -96,11 +98,12 @@ const renderParams = ({ params, parent }) => {
     }
   }
   renderParam({
-    name: 'Opacity',
+    name: 'opacity',
     min: 0,
     max: 1,
     step: 0.01,
     param: params.opacity,
+    title,
     parent
   })
 
@@ -112,10 +115,11 @@ const renderParams = ({ params, parent }) => {
     }
   }
   renderParam({
-    name: 'Noise',
+    name: 'noise',
     min: 0,
     max: 100,
     param: params.noise,
+    title,
     parent
   })
 }
