@@ -90,13 +90,6 @@ class Program {
   }
 
   renderParams({ params, parent }) {
-    const lengthInput = document.createElement('input')
-    lengthInput.value = params.length || LENGTH_DEFAULT
-    lengthInput.oninput = () => {
-      params.length = parseInt(lengthInput.value, 10)
-    }
-    renderInput({ label: 'Length:', input: lengthInput, parent })
-
     const reverseInput = document.createElement('input')
     reverseInput.type = 'checkbox'
     reverseInput.checked = !!params.reverse
