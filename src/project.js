@@ -11,9 +11,14 @@ let Project = {
   programs: []
 }
 
-if (projectFile) {
-  Project = jsonfile.readFileSync(projectFile)
-  if (!Project.programs) Project.programs = [] //backwards compatability
+try {
+  if (projectFile) {
+    Project = jsonfile.readFileSync(projectFile)
+    if (!Project.programs) Project.programs = [] //backwards compatability
+  }
+} catch (e) {
+  localStorage.removeItem('projectFile')
+  console.log(e)
 }
 
 module.exports = Project
