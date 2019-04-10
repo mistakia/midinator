@@ -21,4 +21,15 @@ try {
   console.log(e)
 }
 
-module.exports = Project
+const getProject = () => {
+  return Project
+}
+
+const setProject = (value) => {
+  return Project = value
+}
+
+module.exports = {
+  getProject,
+  setProject
+}

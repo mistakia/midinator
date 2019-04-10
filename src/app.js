@@ -28,9 +28,9 @@ const {
   setSelectedNotes
 } = require('./selected-notes')
 const Audio = require('./audio')
-let { getPlayer } = require('./player')
+const { getPlayer } = require('./player')
 const config = require('../config')
-let Project = require('./project')
+const { getProject } = require('./project')
 
 const LENGTH_DEFAULT = 10
 const COLOR_DEFAULT = 'rgba(255,255,255,1)'
@@ -41,10 +41,10 @@ const timeline = document.getElementById('timeline')
 const programParamElem = document.getElementById('program-params')
 
 const getNoteElem = (byteIndex) => document.querySelector(`.note[data-byte-index="${byteIndex}"]`)
-const getMidiEvent = (byteIndex) => Project.midiEvents.find(e => e.byteIndex == byteIndex)
+const getMidiEvent = (byteIndex) => getProject().midiEvents.find(e => e.byteIndex == byteIndex)
 const getMidiRange = (start, end) => {
   let range = []
-  let onNotes = Project.midiEvents.filter(e => e.name === 'Note on')
+  let onNotes = getProject().midiEvents.filter(e => e.name === 'Note on')
   let lastTick
   for (let i=0; i<onNotes.length; i++) {
     const note = onNotes[i]
@@ -342,7 +342,7 @@ const drawProgramList = ({ programs, mismatch }) => {
       })
 
       let note = selectedNotes[0]
-      const getNextNote = (tick) => Project.midiEvents.find(e => e.name === 'Note on' && e.tick > tick)
+      const getNextNote = (tick) => getProject().midiEvents.find(e => e.name === 'Note on' && e.tick > tick)
 
       for (let i=0; i < sortedCopySet.length; i++) {
         const { programs } = sortedCopySet[i]
@@ -487,6 +487,7 @@ const renderApp = () => {
   }
 
   let lastTick
+  const Project = getProject()
   for (let i=0; i < Project.midiEvents.length; i++) {
     const midiEvent = Project.midiEvents[i]
     if (midiEvent.name !== 'Note on') continue
