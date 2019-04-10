@@ -1,7 +1,42 @@
 const eases = require('d3-ease')
 const Param = require('./param')
+const { getProject } = require('./project')
 const { getSelectedNotes } = require('./selected-notes')
 
+const getMidiEvent = ({ byteIndex, tick, delta, noteNumber }) => {
+  const Project = getProject()
+  let midiEvent
+  let midiIndex
+
+  for (let i=0; i<Project.midiEvents.length; i++) {
+    const e = Project.midiEvents[i]
+    let match = true
+
+    if (isDefined(byteIndex)) {
+      match = e.byteIndex == byteIndex && match
+    }
+
+    if (isDefined(tick)) {
+      match = e.tick == tick && match
+    }
+
+    if (isDefined(delta)) {
+      match = e.delta == delta && match
+    }
+
+    if (isDefined(noteNumber)) {
+      match = e.noteNumber == noteNumber && match
+    }
+
+    if (match) {
+      midiEvent = e
+      midiIndex = i
+      break
+    }
+  }
+
+  return { midiEvent, midiIndex }
+}
 const isDefined = (value) => (typeof value !== 'undefined' && value !== null)
 
 const removeClassName = (className, selector) => {
@@ -146,6 +181,7 @@ const updateProgramParam = ({ name, value, title }) => {
 
 module.exports = {
   clearProgramParams,
+  getMidiEvent,
   renderInput,
   renderParam,
   resetClassName,

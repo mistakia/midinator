@@ -3,6 +3,7 @@ const Pickr = require('@simonwep/pickr')
 
 const Programs = require('./programs')
 const {
+  getMidiEvent,
   renderInput,
   resetClassName,
   removeClassName,
@@ -41,7 +42,6 @@ const timeline = document.getElementById('timeline')
 const programParamElem = document.getElementById('program-params')
 
 const getNoteElem = (byteIndex) => document.querySelector(`.note[data-byte-index="${byteIndex}"]`)
-const getMidiEvent = (byteIndex) => getProject().midiEvents.find(e => e.byteIndex == byteIndex)
 const getMidiRange = (start, end) => {
   let range = []
   let onNotes = getProject().midiEvents.filter(e => e.name === 'Note on')
@@ -415,7 +415,7 @@ const renderApp = () => {
     event.target.classList.add('active')
 
     const { byteIndex } = event.target.dataset
-    const midiEvent = getMidiEvent(byteIndex)
+    const { midiEvent } = getMidiEvent({ byteIndex })
 
     if (event.metaKey) addNoteToSelection(midiEvent)
     else if (event.shiftKey && selectedNotes.length) {
