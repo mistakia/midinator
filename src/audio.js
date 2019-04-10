@@ -1,6 +1,6 @@
 const { Howl, Howler } = require('howler')
 
-const Project = require('./project')
+const { getProject } = require('./project')
 
 let player
 
@@ -13,6 +13,8 @@ const load = (file) => {
     src: [file]
   })
 }
+
+let Project = getProject()
 
 if (Project.audioFile) {
   load(Project.audioFile)

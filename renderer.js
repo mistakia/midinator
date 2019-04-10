@@ -14,39 +14,41 @@ const config = require('./config')
 let Programs = require('./src/programs')
 const { renderApp, setPosition } = require('./src/app')
 const { renderColumns, getColumns } = require('./src/columns')
-let { getPlayer, loadMidiPlayer } = require('./src/player')
-let Project = require('./src/project')
+const { getPlayer, loadMidiPlayer } = require('./src/player')
+const { getProject, setProject } = require('./src/project')
 let Audio = require('./src/audio')
 
 const columnWidth = config.videoWidth / config.totalColumns
-
-if (Project.midiFile) {
-  loadMidiPlayer(Project.midiFile)
-  if (Project.tempo) {
-    const player = getPlayer()
-    player.setTempo(Project.tempo)
-  }
-  renderApp()
-}
-
-if (Project.programs.length) {
-  Programs.load(Project.programs)
-}
-
-if (!fs.existsSync('./frames')) {
-  fs.mkdirSync('./frames')
-}
-
-if (!fs.existsSync('./tmp')) {
-  fs.mkdirSync('./tmp')
-}
-
 const progressElem = document.getElementById('progress')
 const timeline = document.getElementById('timeline')
 const canvas = document.getElementById('canvas')
 const ctx = canvas.getContext('2d')
 canvas.width = config.videoWidth
 canvas.height = config.videoHeight
+
+const init = () => {
+  const Project = getProject()
+  if (Project.midiFile) {
+    loadMidiPlayer(Project.midiFile)
+    if (Project.tempo) {
+      const player = getPlayer()
+      player.setTempo(Project.tempo)
+    }
+    renderApp()
+  }
+
+  if (Project.programs.length) {
+    Programs.load(Project.programs)
+  }
+
+  if (!fs.existsSync('./frames')) {
+    fs.mkdirSync('./frames')
+  }
+
+  if (!fs.existsSync('./tmp')) {
+    fs.mkdirSync('./tmp')
+  }
+}
 
 const loadMidiFile = () => {
   dialog.showOpenDialog({
@@ -58,6 +60,7 @@ const loadMidiFile = () => {
     ]
   }, function (files) {
     if (files !== undefined) {
+      const Project = getProject()
       Project.midiFile = files[0]
       loadMidiPlayer(Project.midiFile)
       const player = getPlayer()
@@ -97,6 +100,7 @@ const play = () => {
     // reset canvas
     canvas.width = canvas.width
 
+    const Project = getProject()
     for (let e=0; e < Project.midiEvents.length; e++) {
       const midiEvent = Project.midiEvents[e]
 
@@ -156,6 +160,7 @@ const exportVideo = (outputPath) => {
     ctx.fillStyle = 'black'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
+    const Project = getProject()
     for (let e=0; e < Project.midiEvents.length; e++) {
       const midiEvent = Project.midiEvents[e]
 
@@ -235,6 +240,7 @@ const save = () => {
     ]
   }, function (file) {
     if (file) {
+      const Project = getProject()
       jsonfile.writeFileSync(file, Project)
       localStorage.setItem('projectFile', file)
     }
@@ -252,7 +258,7 @@ const loadJSON = () => {
   }, (files) => {
     if (files !== undefined) {
       const file = files[0]
-      Project = jsonfile.readFileSync(file)
+      const Project = setProject(jsonfile.readFileSync(file))
       loadMidiPlayer(Project.midiFile, () => {
         const player = getPlayer()
         player.tracks[0].events = Project.midiEvents
@@ -276,6 +282,7 @@ const showProgramDialog = () => {
   }, async (files) => {
     if (files !== undefined) {
       const file = files[0]
+      const Project = getProject()
       Project.programs.push(file)
       Programs.load(Project.programs)
     }
@@ -293,6 +300,7 @@ const loadAudio = () => {
   }, async (files) => {
     if (files !== undefined) {
       const file = files[0]
+      const Project = getProject()
       Project.audioFile = file
       Audio.load(file)
     }
@@ -304,6 +312,7 @@ const setTempo = () => {
     if (input) {
       const player = getPlayer()
       const tempo = parseInt(input, 10)
+      const Project = getProject()
       Project.tempo = tempo
       player.setTempo(tempo)
       document.getElementById('tempo').innerHTML = `Tempo: ${player.tempo}`
@@ -321,3 +330,5 @@ document.querySelector('#export').addEventListener('click', showExportDialog)
 document.querySelector('#loadProgram').addEventListener('click', showProgramDialog)
 document.querySelector('#loadAudio').addEventListener('click', loadAudio)
 document.querySelector('#setTempo').addEventListener('click', setTempo)
+
+init()
