@@ -68,9 +68,9 @@ class Program {
     })
   }
 
-  run({ delta, length, ease, reverse, width, height }) {
-    canvas.width = width
-    canvas.height = height
+  run({ delta, length, ease, reverse, canvasWidth, canvasHeight }) {
+    canvas.width = canvasWidth
+    canvas.height = canvasHeight
 
     length = length || LENGTH_DEFAULT
     ease = ease || EASE_DEFAULT
