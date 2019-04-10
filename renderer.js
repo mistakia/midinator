@@ -16,6 +16,7 @@ const { renderApp, setPosition } = require('./src/app')
 const { renderColumns, getColumns } = require('./src/columns')
 const { getPlayer, loadMidiPlayer } = require('./src/player')
 const { getProject, setProject } = require('./src/project')
+const { getMidiEvent } = require('./src/utils')
 let Audio = require('./src/audio')
 
 const columnWidth = config.videoWidth / config.totalColumns
@@ -29,12 +30,40 @@ canvas.height = config.videoHeight
 const init = () => {
   const Project = getProject()
   if (Project.midiFile) {
-    loadMidiPlayer(Project.midiFile)
-    if (Project.tempo) {
+    console.log(`loading midiFile: ${Project.midiFile}`)
+
+    loadMidiPlayer(Project.midiFile, () => {
       const player = getPlayer()
-      player.setTempo(Project.tempo)
-    }
-    renderApp()
+      const midiFileEvents = player.getEvents()[0]
+      console.log(midiFileEvents)
+      console.log(Project.midiEvents)
+
+      let mergedEvents = []
+      midiFileEvents.forEach((e) => {
+        if (e.name !== 'Note on') {
+          return mergedEvents.push(e)
+        }
+
+        const { midiEvent, midiIndex } = getMidiEvent({
+          tick: e.tick,
+          noteNumber: e.noteNumber,
+        })
+        if (midiEvent) {
+          Project.midiEvents[midiIndex].byteIndex = e.byteIndex
+          mergedEvents.push(Project.midiEvents[midiIndex])
+        } else {
+          mergedEvents.push(e)
+        }
+      })
+
+      Project.midiEvents = mergedEvents
+
+      if (Project.tempo) {
+        const player = getPlayer()
+        player.setTempo(Project.tempo)
+      }
+      renderApp()
+    })
   }
 
   if (Project.programs.length) {
