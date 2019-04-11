@@ -41,10 +41,10 @@ let selectedMeasure = 1
 const timeline = document.getElementById('timeline')
 const programParamElem = document.getElementById('program-params')
 
-const getNoteElem = (byteIndex) => document.querySelector(`.note[data-byte-index="${byteIndex}"]`)
+const getNoteElem = (tick) => document.querySelector(`.note[data-tick="${tick}"]`)
 const getMidiRange = (start, end) => {
   let range = []
-  let onNotes = getProject().midiEvents.filter(e => e.name === 'Note on')
+  let onNotes = getProject().midiEvents
   let lastTick
   for (let i=0; i<onNotes.length; i++) {
     const note = onNotes[i]
@@ -65,7 +65,7 @@ const renderClearPrograms = ({ parent }) => {
   clearProgramsElem.addEventListener('click', () => {
     selectedNotes.forEach((note) => {
       note.programs = []
-      const elem = getNoteElem(note.byteIndex)
+      const elem = getNoteElem(note.tick)
       elem.classList.remove('not-empty')
     })
     drawProgramList({ programs: [] })
@@ -92,7 +92,7 @@ const drawProgramList = ({ programs, mismatch }) => {
         programs.splice(idx, 1)
         if (!programs.length) {
           selectedNotes.forEach((note) => {
-            const elem = getNoteElem(note.byteIndex)
+            const elem = getNoteElem(note.tick)
             elem.classList.remove('not-empty')
           })
         }
@@ -251,7 +251,7 @@ const drawProgramList = ({ programs, mismatch }) => {
     const firstProgram = Programs.list()[0]
     if (!programs.length) {
       selectedNotes.forEach((note) => {
-        const elem = getNoteElem(note.byteIndex)
+        const elem = getNoteElem(note.tick)
         elem.classList.add('not-empty')
       })
     }
@@ -304,7 +304,7 @@ const drawProgramList = ({ programs, mismatch }) => {
       selectedNotes.forEach((note) => {
         note.programs = note.programs.concat(cp)
         if (note.programs.length) {
-          const elem = getNoteElem(note.byteIndex)
+          const elem = getNoteElem(note.tick)
           elem.classList.add('not-empty')
         }
       })
@@ -323,7 +323,7 @@ const drawProgramList = ({ programs, mismatch }) => {
       selectedNotes.forEach((note) => {
         note.programs = note.programs.concat(cp)
         if (note.programs.length) {
-          const elem = getNoteElem(note.byteIndex)
+          const elem = getNoteElem(note.tick)
           elem.classList.add('not-empty')
         }
       })
@@ -338,17 +338,17 @@ const drawProgramList = ({ programs, mismatch }) => {
     pasteSetElem.innerHTML = 'Paste Set'
     pasteSetElem.addEventListener('click', () => {
       const sortedCopySet = copySet.sort((a, b) => {
-        return a.byteIndex - b.byteIndex
+        return a.tick - b.tick
       })
 
       let note = selectedNotes[0]
-      const getNextNote = (tick) => getProject().midiEvents.find(e => e.name === 'Note on' && e.tick > tick)
+      const getNextNote = (tick) => getProject().midiEvents.find(e => e.tick > tick)
 
       for (let i=0; i < sortedCopySet.length; i++) {
         const { programs } = sortedCopySet[i]
         if (programs && programs.length) {
           note.programs = JSON.parse(JSON.stringify(programs))
-          const elem = getNoteElem(note.byteIndex)
+          const elem = getNoteElem(note.tick)
           elem.classList.add('not-empty')
         }
 
@@ -402,7 +402,6 @@ const renderApp = () => {
     const parent = document.querySelector(`.measure:nth-child(${measureNumber})`)
     const position = ((midiEvent.tick % measureLength) / measureLength) * 100
     elem.setAttribute('style', `left: ${position}%;`)
-    elem.dataset.byteIndex = midiEvent.byteIndex
     elem.dataset.tick = midiEvent.tick
     parent.appendChild(elem)
   }
@@ -414,8 +413,8 @@ const renderApp = () => {
     programParamElem.innerHTML = ''
     event.target.classList.add('active')
 
-    const { byteIndex } = event.target.dataset
-    const { midiEvent } = getMidiEvent({ byteIndex })
+    const { tick } = event.target.dataset
+    const { midiEvent } = getMidiEvent({ tick })
 
     if (event.metaKey) addNoteToSelection(midiEvent)
     else if (event.shiftKey && selectedNotes.length) {
@@ -426,7 +425,7 @@ const renderApp = () => {
       const notes = getMidiRange(start, end)
 
       notes.forEach((n) => {
-        const elem = getNoteElem(n.byteIndex)
+        const elem = getNoteElem(n.tick)
         elem.classList.add('active')
       })
 
@@ -474,7 +473,7 @@ const renderApp = () => {
     // set selectedNotes to program
     selectedNotes.forEach((note) => {
       if (!programs.length) {
-        const elem = getNoteElem(note.byteIndex)
+        const elem = getNoteElem(note.tick)
         elem.classList.remove('not-empty')
       }
       note.programs = programs
@@ -486,17 +485,11 @@ const renderApp = () => {
     drawMeasure(i)
   }
 
-  let lastTick
   const Project = getProject()
-  for (let i=0; i < Project.midiEvents.length; i++) {
-    const midiEvent = Project.midiEvents[i]
-    if (midiEvent.name !== 'Note on') continue
+  Project.midiEvents.forEach((midiEvent) => {
     midiEvent.programs = midiEvent.programs || []
-    if (midiEvent.tick !== lastTick) {
-      drawNote(midiEvent)
-      lastTick = midiEvent.tick
-    }
-  }
+    drawNote(midiEvent)
+  })
 
   const noteElems = document.querySelectorAll('.note')
   noteElems.forEach((elem) => elem.addEventListener('click', loadNote))
