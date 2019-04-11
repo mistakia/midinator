@@ -35,28 +35,30 @@ const init = () => {
     loadMidiPlayer(Project.midiFile, () => {
       const player = getPlayer()
       const midiFileEvents = player.getEvents()[0]
-      console.log(midiFileEvents)
-      console.log(Project.midiEvents)
 
-      let mergedEvents = []
-      midiFileEvents.forEach((e) => {
-        if (e.name !== 'Note on') {
-          return mergedEvents.push(e)
-        }
+      const merged = {}
 
-        const { midiEvent, midiIndex } = getMidiEvent({
-          tick: e.tick,
-          noteNumber: e.noteNumber,
-        })
-        if (midiEvent) {
-          Project.midiEvents[midiIndex].byteIndex = e.byteIndex
-          mergedEvents.push(Project.midiEvents[midiIndex])
-        } else {
-          mergedEvents.push(e)
+      Project.midiEvents.forEach((midiEvent) => {
+        if (midiEvent.name !== 'Note on') return
+
+        const hasProgram = (e) => e.programs && e.programs.length
+
+        if (!merged[midiEvent.tick]) {
+          merged[midiEvent.tick] = midiEvent
+        } else if (!hasProgram(merged[midiEvent.tick]) && hasProgram(midiEvent.programs)) {
+          merged[midiEvent.tick] = midiEvent
         }
       })
 
-      Project.midiEvents = mergedEvents
+      midiFileEvents.forEach((midiEvent) => {
+        if (midiEvent.name !== 'Note on') return
+
+        if (!merged[midiEvent.tick]) {
+          merged[midiEvent.tick] = midiEvent
+        }
+      })
+
+      Project.midiEvents = Object.values(merged).sort((a, b) => a.tick - b.tick)
 
       if (Project.tempo) {
         const player = getPlayer()
