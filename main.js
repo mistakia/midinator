@@ -1,18 +1,51 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow} = require('electron')
+const { app, BrowserWindow, ipcMain } = require('electron')
 
 const isDevelopment = process.env.NODE_ENV === 'development'
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
+let renderWindow
+let videoWindow
 
-function createWindow () {
+function createWindows () {
+  createMainWindow()
+  createRenderWindow()
+  createVideoWindow()
+}
+
+function createVideoWindow () {
+  // Create the browser window.
+  videoWindow = new BrowserWindow({
+    width: 640,
+    height: 320,
+    resizable: false,
+    webPreferences: {
+      nodeIntegration: true
+    }
+  })
+
+  // and load the index.html of the app.
+  videoWindow.loadFile('video.html')
+
+  // Open the DevTools.
+  if (isDevelopment) videoWindow.webContents.openDevTools()
+
+  // Emitted when the window is closed.
+  videoWindow.on('closed', function () {
+    // Dereference the window object, usually you would store windows
+    // in an array if your app supports multi windows, this is the time
+    // when you should delete the corresponding element.
+    videoWindow = null
+  })
+}
+
+function createMainWindow () {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 900,
     height: 650,
-    titleBarStyle: 'hidden',
     webPreferences: {
       nodeIntegration: true
     }
@@ -33,10 +66,36 @@ function createWindow () {
   })
 }
 
+function createRenderWindow () {
+  // Create the browser window.
+  renderWindow = new BrowserWindow({
+    width: 500,
+    height: 500,
+    resizable: false,
+    webPreferences: {
+      nodeIntegration: true
+    }
+  })
+
+  // and load the index.html of the app.
+  renderWindow.loadFile('render.html')
+
+  // Open the DevTools.
+  if (isDevelopment) renderWindow.webContents.openDevTools()
+
+  // Emitted when the window is closed.
+  renderWindow.on('closed', function () {
+    // Dereference the window object, usually you would store windows
+    // in an array if your app supports multi windows, this is the time
+    // when you should delete the corresponding element.
+    renderWindow = null
+  })
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow)
+app.on('ready', createWindows)
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {
@@ -57,3 +116,11 @@ app.on('activate', function () {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+
+ipcMain.on('render', (event, message) => {
+  renderWindow && renderWindow.webContents.send('render', message)
+})
+
+ipcMain.on('video', (event, message) => {
+  videoWindow && videoWindow.webContents.send('video', message)
+})
