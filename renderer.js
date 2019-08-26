@@ -8,6 +8,7 @@ const jsonfile = require('jsonfile')
 const userPrompt = require('electron-osx-prompt')
 
 const { dialog, getCurrentWindow } = require('electron').remote
+const ipc = require('electron').ipcRenderer
 const win = getCurrentWindow()
 
 const config = require('./config')
@@ -22,8 +23,8 @@ let Audio = require('./src/audio')
 const columnWidth = config.videoWidth / config.totalColumns
 const progressElem = document.getElementById('progress')
 const timeline = document.getElementById('timeline')
-const canvas = document.getElementById('canvas')
-const ctx = canvas.getContext('2d')
+const canvas = document.createElement('canvas')
+const ctx = canvas.getContext('2d', { alpha: false })
 canvas.width = config.videoWidth
 canvas.height = config.videoHeight
 
@@ -118,8 +119,6 @@ const play = () => {
   const currentPosition = document.createElement('div')
   currentPosition.id = 'current-position'
   const animate = () => {
-    if (player.isPlaying()) window.requestAnimationFrame(animate)
-
     if (currentPosition.parentNode) currentPosition.parentNode.removeChild(currentPosition)
     const measureLength = player.division * 4
     const currentMeasure = Math.ceil(currentTick / measureLength)
@@ -156,6 +155,21 @@ const play = () => {
         renderColumns({ cnvs, ctx, columns })
       })
     }
+
+    let images = {}
+    for (let i = 0; i < config.totalColumns; i++) {
+      const imageData = ctx.getImageData(i * columnWidth, 0, columnWidth, canvas.height)
+      const tCanvas = document.createElement('canvas')
+      tCanvas.width = columnWidth
+      tCanvas.height = canvas.height
+      const tCtx = tCanvas.getContext('2d', { alpha: false })
+      tCtx.putImageData(imageData, 0, 0)
+      images[i] = tCanvas.toDataURL('image/jpg')
+    }
+    ipc.send('render', { images })
+    ipc.send('video', { imageData: ctx.getImageData(0, 0, canvas.width, canvas.height) })
+
+    if (player.isPlaying()) setImmediate(animate)
   }
 
   player.on('playing', (tick) => currentTick = tick.tick)
@@ -163,7 +177,7 @@ const play = () => {
   player.play()
   if (audio) audio.play()
   document.querySelector('#play').innerHTML = 'Reset'
-  window.requestAnimationFrame(animate)
+  setImmediate(animate)
 }
 
 const showExportDialog = () => {
