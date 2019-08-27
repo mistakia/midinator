@@ -158,13 +158,7 @@ const play = () => {
 
     let images = {}
     for (let i = 0; i < config.totalColumns; i++) {
-      const imageData = ctx.getImageData(i * columnWidth, 0, columnWidth, canvas.height)
-      const tCanvas = document.createElement('canvas')
-      tCanvas.width = columnWidth
-      tCanvas.height = canvas.height
-      const tCtx = tCanvas.getContext('2d', { alpha: false })
-      tCtx.putImageData(imageData, 0, 0)
-      images[i] = tCanvas.toDataURL('image/jpg')
+      images[i] = ctx.getImageData(i * columnWidth, 0, columnWidth, canvas.height)
     }
     ipc.send('render', { images })
     ipc.send('video', { imageData: ctx.getImageData(0, 0, canvas.width, canvas.height) })
