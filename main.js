@@ -1,5 +1,6 @@
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, ipcMain } = require('electron')
+const config = require('./config')
 
 const isDevelopment = process.env.NODE_ENV === 'development'
 
@@ -19,7 +20,7 @@ function createVideoWindow () {
   // Create the browser window.
   videoWindow = new BrowserWindow({
     width: 640,
-    height: 320,
+    height: 360,
     resizable: false,
     webPreferences: {
       nodeIntegration: true
