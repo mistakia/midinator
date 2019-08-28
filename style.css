@@ -7,7 +7,7 @@ html, body {
 main {
     height: 100%;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
 }
 
 section {
@@ -18,12 +18,20 @@ canvas {
     background-color: black;
 }
 
-#top-section {
-    flex: 0 0 auto;
-    width: 100%;
+#left-section {
+    flex: 1;
     display: flex;
-    height: 230px;
+    flex-direction: column;
+    height: 100%
+}
+
+#right-section {
+    flex: 0 0 250px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     overflow: hidden;
+    border-left: 1px solid #f0f0f0;
 }
 
 #output {
@@ -35,6 +43,7 @@ canvas {
     background: #fafafa;
     padding: 25px 10px;
     overflow-y: scroll;
+    border-top: 1px solid #f0f0f0;
 }
 
 #clipboard {

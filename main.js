@@ -45,8 +45,10 @@ function createVideoWindow () {
 function createEditorWindow () {
   // Create the browser window.
   editorWindow = new BrowserWindow({
-    width: 900,
+    width: 1000,
     height: 650,
+    minWidth: 900,
+    minHeight: 400,
     webPreferences: {
       nodeIntegration: true
     }
