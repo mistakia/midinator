@@ -6,12 +6,12 @@ const isDevelopment = process.env.NODE_ENV === 'development'
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let mainWindow
+let editorWindow
 let renderWindow
 let videoWindow
 
 function createWindows () {
-  createMainWindow()
+  createEditorWindow()
   createRenderWindow()
   createVideoWindow()
 }
@@ -42,9 +42,9 @@ function createVideoWindow () {
   })
 }
 
-function createMainWindow () {
+function createEditorWindow () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({
+  editorWindow = new BrowserWindow({
     width: 900,
     height: 650,
     webPreferences: {
@@ -53,17 +53,17 @@ function createMainWindow () {
   })
 
   // and load the index.html of the app.
-  mainWindow.loadFile('index.html')
+  editorWindow.loadFile('editor.html')
 
   // Open the DevTools.
-  if (isDevelopment) mainWindow.webContents.openDevTools()
+  if (isDevelopment) editorWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
-  mainWindow.on('closed', function () {
+  editorWindow.on('closed', function () {
     // Dereference the window object, usually you would store windows
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
-    mainWindow = null
+    editorWindow = null
   })
 }
 
@@ -110,7 +110,7 @@ app.on('window-all-closed', function () {
 app.on('activate', function () {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
-  if (mainWindow === null) {
+  if (editorWindow === null) {
     createWindow()
   }
 })
