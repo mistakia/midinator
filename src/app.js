@@ -1,5 +1,7 @@
 const eases = require('d3-ease')
 const Pickr = require('@simonwep/pickr')
+const hotkeys = require('hotkeys-js')
+const prompt = require('electron-prompt')
 
 const Programs = require('./programs')
 const {
@@ -10,7 +12,6 @@ const {
   updateProgramParam
 } = require('./utils')
 const { renderColumnParams } = require('./columns')
-
 const {
   getCompositionPrograms,
   addToCompositions,
@@ -40,7 +41,6 @@ let selectedMeasure = 1
 
 const timeline = document.getElementById('timeline')
 const programParamElem = document.getElementById('program-params')
-
 const getNoteElem = (tick) => document.querySelector(`.note[data-tick="${tick}"]`)
 const getMidiRange = (start, end) => {
   let range = []
@@ -375,6 +375,99 @@ const drawMeasure = (measureNumber) => {
   timeline.appendChild(elem)
 }
 
+const drawNote = (midiEvent) => {
+  const player = getPlayer()
+  const measureLength = player.division * 4
+
+  const elem = document.createElement('div')
+  elem.className = 'note'
+
+  if (midiEvent.programs.length) elem.classList.add('not-empty')
+  const measureNumber = Math.floor(midiEvent.tick / measureLength) + 1
+  const parent = document.querySelector(`.measure:nth-child(${measureNumber})`)
+  const position = ((midiEvent.tick % measureLength) / measureLength) * 100
+  elem.setAttribute('style', `left: ${position}%;`)
+  elem.dataset.tick = midiEvent.tick
+  elem.addEventListener('click', loadNote)
+  parent.appendChild(elem)
+}
+
+const loadNote = (event) => {
+  let selectedNotes = getSelectedNotes()
+  event.stopPropagation()
+  if (!event.metaKey && !event.shiftKey) removeClassName('active', '.note.active')
+  programParamElem.innerHTML = ''
+  event.target.classList.add('active')
+
+  const { tick } = event.target.dataset
+  const { midiEvent } = getMidiEvent({ tick })
+
+  if (event.metaKey) addNoteToSelection(midiEvent)
+  else if (event.shiftKey && selectedNotes.length) {
+    const lastNote = selectedNotes[selectedNotes.length - 1]
+
+    const start = Math.min(midiEvent.tick, lastNote.tick)
+    const end = Math.max(midiEvent.tick, lastNote.tick)
+    const notes = getMidiRange(start, end)
+
+    notes.forEach((n) => {
+      const elem = getNoteElem(n.tick)
+      elem.classList.add('active')
+    })
+
+    selectedNotes = setSelectedNotes(selectedNotes.concat(notes))
+    addNoteToSelection(midiEvent)
+
+    // get all the values in between
+  } else selectedNotes = setSelectedNotes([midiEvent])
+
+  // set program var
+  let { programs } = selectedNotes[0]
+  programs = JSON.parse(JSON.stringify(programs))
+
+  // check if equal
+  let matchingPrograms = true
+  for (let i=0; i < selectedNotes.length; i++) {
+    let p = selectedNotes[i].programs
+    if (JSON.stringify(p) !== JSON.stringify(programs)) {
+      matchingPrograms = false
+      break
+    }
+  }
+
+  if (!matchingPrograms) {
+    let commonProgramNames = programs.map(a => a.title)
+    for (let i=1; i< selectedNotes.length; i++) {
+      let current = selectedNotes[i].programs.map(a => a.title)
+      commonProgramNames = commonProgramNames.filter(a => current.includes(a))
+    }
+
+    let commonPrograms = []
+
+    if (commonProgramNames.length) {
+      commonPrograms = programs.filter(a => commonProgramNames.includes(a.title))
+    }
+
+    /* selectedNotes.forEach((note) => {
+     *   const otherPrograms = note.programs.filter(p => !commonProgramNames.includes(p.title))
+     *   note.programs = otherPrograms.concat(commonPrograms)
+     * })
+     */
+    return drawProgramList({ programs: commonPrograms, mismatch: true })
+  }
+
+  // set selectedNotes to program
+  selectedNotes.forEach((note) => {
+    if (!programs.length) {
+      const elem = getNoteElem(note.tick)
+      elem.classList.remove('not-empty')
+    }
+    note.programs = programs
+  })
+  drawProgramList({ programs })
+}
+
+
 const renderApp = () => {
   const player = getPlayer()
   timeline.innerHTML = '' //clear timeline
@@ -393,94 +486,6 @@ const renderApp = () => {
   document.getElementById('tempo').innerHTML = `Tempo: ${player.tempo}`
   document.getElementById('division').innerHTML = `Division: ${player.division}`
 
-  const drawNote = (midiEvent) => {
-    const elem = document.createElement('div')
-    elem.className = 'note'
-
-    if (midiEvent.programs.length) elem.classList.add('not-empty')
-    const measureNumber = Math.floor(midiEvent.tick / measureLength) + 1
-    const parent = document.querySelector(`.measure:nth-child(${measureNumber})`)
-    const position = ((midiEvent.tick % measureLength) / measureLength) * 100
-    elem.setAttribute('style', `left: ${position}%;`)
-    elem.dataset.tick = midiEvent.tick
-    parent.appendChild(elem)
-  }
-
-  const loadNote = (event) => {
-    let selectedNotes = getSelectedNotes()
-    event.stopPropagation()
-    if (!event.metaKey && !event.shiftKey) removeClassName('active', '.note.active')
-    programParamElem.innerHTML = ''
-    event.target.classList.add('active')
-
-    const { tick } = event.target.dataset
-    const { midiEvent } = getMidiEvent({ tick })
-
-    if (event.metaKey) addNoteToSelection(midiEvent)
-    else if (event.shiftKey && selectedNotes.length) {
-      const lastNote = selectedNotes[selectedNotes.length - 1]
-
-      const start = Math.min(midiEvent.tick, lastNote.tick)
-      const end = Math.max(midiEvent.tick, lastNote.tick)
-      const notes = getMidiRange(start, end)
-
-      notes.forEach((n) => {
-        const elem = getNoteElem(n.tick)
-        elem.classList.add('active')
-      })
-
-      selectedNotes = setSelectedNotes(selectedNotes.concat(notes))
-      addNoteToSelection(midiEvent)
-
-      // get all the values in between
-    } else selectedNotes = setSelectedNotes([midiEvent])
-
-    // set program var
-    let { programs } = selectedNotes[0]
-    programs = JSON.parse(JSON.stringify(programs))
-
-    // check if equal
-    let matchingPrograms = true
-    for (let i=0; i < selectedNotes.length; i++) {
-      let p = selectedNotes[i].programs
-      if (JSON.stringify(p) !== JSON.stringify(programs)) {
-        matchingPrograms = false
-        break
-      }
-    }
-
-    if (!matchingPrograms) {
-      let commonProgramNames = programs.map(a => a.title)
-      for (let i=1; i< selectedNotes.length; i++) {
-        let current = selectedNotes[i].programs.map(a => a.title)
-        commonProgramNames = commonProgramNames.filter(a => current.includes(a))
-      }
-
-      let commonPrograms = []
-
-      if (commonProgramNames.length) {
-        commonPrograms = programs.filter(a => commonProgramNames.includes(a.title))
-      }
-
-      /* selectedNotes.forEach((note) => {
-       *   const otherPrograms = note.programs.filter(p => !commonProgramNames.includes(p.title))
-       *   note.programs = otherPrograms.concat(commonPrograms)
-       * })
-       */
-      return drawProgramList({ programs: commonPrograms, mismatch: true })
-    }
-
-    // set selectedNotes to program
-    selectedNotes.forEach((note) => {
-      if (!programs.length) {
-        const elem = getNoteElem(note.tick)
-        elem.classList.remove('not-empty')
-      }
-      note.programs = programs
-    })
-    drawProgramList({ programs })
-  }
-
   for (let i=1; i<=totalMeasures;i++) {
     drawMeasure(i)
   }
@@ -490,9 +495,6 @@ const renderApp = () => {
     midiEvent.programs = midiEvent.programs || []
     drawNote(midiEvent)
   })
-
-  const noteElems = document.querySelectorAll('.note')
-  noteElems.forEach((elem) => elem.addEventListener('click', loadNote))
 }
 
 const setPosition = (measure = selectedMeasure) => {
@@ -507,6 +509,38 @@ const setPosition = (measure = selectedMeasure) => {
 
   selectedMeasure = measure
 }
+
+hotkeys('n', function(event, handler){
+  event.preventDefault()
+  prompt({
+    title: 'Create midi note',
+    label: 'tick #',
+    type: 'input',
+    inputAttrs: {
+      type: 'text',
+      required: true
+    }
+  }).then((r) => {
+    if (r) {
+      const tick = parseInt(r, 10)
+      const Project = getProject()
+      const midiEvent = {
+        channel: 1,
+        delta: 0,
+        name: 'Note on',
+        noteName: 'C2',
+        noteNumber: 36,
+        programs: [],
+        tick,
+        track: 1,
+        velocity: 100,
+      }
+      Project.midiEvents.push(midiEvent)
+      drawNote(midiEvent)
+    }
+  }).catch(console.error)
+})
+
 
 module.exports = {
   renderApp,
