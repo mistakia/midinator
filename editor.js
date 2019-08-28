@@ -150,7 +150,7 @@ const play = () => {
           ...program.params
         })
 
-        const columns = getColumns({ delta, ...program.columnParams, ...program.params })
+        const columns = getColumns({ delta, columnParams: program.columnParams, params: program.params })
         if (!columns.length) return ctx.drawImage(cnvs, 0, 0)
         renderColumns({ cnvs, ctx, columns })
       })
@@ -219,7 +219,7 @@ const exportVideo = (outputPath) => {
           ...program.params
         })
 
-        const columns = getColumns({ delta, ...program.columnParams, ...program.params })
+        const columns = getColumns({ delta, columnParams: program.columnParams, params: program.params })
         if (!columns.length) return ctx.drawImage(cnvs, 0, 0)
         renderColumns({ cnvs, ctx, columns })
       })

@@ -1,5 +1,6 @@
 const eases = require('d3-ease')
 const Param = require('./param')
+const config = require('../config')
 const { getProject } = require('./project')
 const { getSelectedNotes } = require('./selected-notes')
 
@@ -105,7 +106,7 @@ const renderInput = ({
   parent.appendChild(programParamContainer)
 }
 
-const renderParam = ({ name, param, parent, min, max, step, title }) => {
+const renderParam = ({ name, param, parent, min, max, step, title, isColumnParam }) => {
   const programParamContainer = document.createElement('div')
   programParamContainer.className = 'program-param'
   programParamContainer.dataset.name = name
@@ -119,7 +120,7 @@ const renderParam = ({ name, param, parent, min, max, step, title }) => {
     range: true,
     oninput: (value) => {
       p.setValue('start', parseFloat(value))
-      updateProgramParam({ name, value: p.values, title })
+      updateProgramParam({ name, value: p.values, title, isColumnParam })
     },
     parent: programParamContainer
   })
@@ -131,7 +132,7 @@ const renderParam = ({ name, param, parent, min, max, step, title }) => {
     range: true,
     oninput: (value) => {
       p.setValue('end', parseFloat(value))
-      updateProgramParam({ name, value: p.values, title })
+      updateProgramParam({ name, value: p.values, title, isColumnParam })
     },
     parent: programParamContainer
   })
@@ -145,7 +146,7 @@ const renderParam = ({ name, param, parent, min, max, step, title }) => {
   if (p.ease) easeSelect.value = p.ease
   easeSelect.addEventListener('input', () => {
     p.setValue('ease', easeSelect.value)
-    updateProgramParam({ name, value: p.values, title })
+    updateProgramParam({ name, value: p.values, title, isColumnParam })
   })
   renderInput({
     label: 'Ease:',
@@ -159,21 +160,24 @@ const renderParam = ({ name, param, parent, min, max, step, title }) => {
     manual: true,
     oninput: (value) => {
       p.setValue('speed', parseFloat(value))
-      updateProgramParam({ name, value: p.values, title })
+      updateProgramParam({ name, value: p.values, title, isColumnParam })
     },
     parent: programParamContainer
   })
 
-
   parent.appendChild(programParamContainer)
 }
 
-const updateProgramParam = ({ name, value, title }) => {
+const updateProgramParam = ({ name, value, title, isColumnParam }) => {
   const selectedNotes = getSelectedNotes()
   selectedNotes.forEach((note, noteIdx) => {
     note.programs.forEach((p, pIdx) => {
       if (p.title === title) {
-        p.params[name] = value
+        if (isColumnParam) {
+          p.columnParams[name] = value
+        } else {
+          p.params[name] = value
+        }
       }
     })
   })

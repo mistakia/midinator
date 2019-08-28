@@ -319,11 +319,12 @@ label {
     flex: 1 0 calc(42% - 2px);
     padding: 12px;
     border-right: 1px solid #f0f0f0;
-    display: flex;
-    flex-direction: column;
+    overflow-y: scroll;
 }
 
 .column-container {
+    width: 100%;
+    height: 100px;
     display: flex;
     flex-wrap: wrap;
     flex: 1 1 auto;

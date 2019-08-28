@@ -1,49 +1,25 @@
-const config = require('../config')
+const config = require('../../config')
 
-const convertCoordsToColumn = (x, y) => {
-  const rows = config.totalColumns / config.columnWidth
-  let row = y % rows
-  if (!row) row = rows
-  return x + (y * row)
-}
-
-const randomWalk = ({ delta, length }) => {
-  const t = delta / length
-
-  const totalSteps = config.totalColumns
-  const column = Math.round(Math.random() * totalSteps)
-  return [column]
-}
-
-const slide = ({ delta, length }) => {
-  const loops = 1
-
-  const t = delta / length
-  const totalSteps = config.totalColumns / config.columnWidth
-  const step = Math.floor(t * totalSteps)
-  const base = [1, 2, 3, 4]
-  const columns = base.map(c => (c + (step * totalSteps)))
-  return columns
-}
-
-const manual = ({ manualSelections, columns }) => {
-  const c = manualSelections || columns || {}
+const manual = ({ columnParams }) => {
+  const { manualSelections } = columnParams
+  const c = manualSelections || {}
   return Object.keys(c).map(c => parseInt(c, 10))
 }
 
 const columnFns = {
   manual,
-  slide,
-  randomWalk
+  slide: require('./slide'),
+  randomWalk: require('./random-walk')
 }
 
-const getColumns = ({ type, delta, ...params }) => {
-  if (!type) {
-    return manual({ delta, ...params })
+const getColumns = ({ delta, columnParams, params }) => {
+  const { type } = columnParams
+  if (!type || type === 'manual') {
+    return manual({ delta, columnParams, params })
   }
 
-  const columnFn = columnFns[type]
-  return columnFn({ delta, ...params })
+  const columnFn = columnFns[type].run
+  return columnFn({ delta, columnParams, params })
 }
 
 const renderColumns = ({ cnvs, ctx, columns }) => {
@@ -75,6 +51,7 @@ const isColumnActive = (columnNumber, params) => {
    }
 */
 const renderColumnParams = ({ programParamElem, program }) => {
+  console.log(program)
   let { columnParams } = program
 
   if (!columnParams) {
@@ -83,7 +60,14 @@ const renderColumnParams = ({ programParamElem, program }) => {
 
   if (program.columns) columnParams.manualSelections = program.columns
 
-  const columnParamsElem = document.createElement('div')
+  let columnParamsElem = document.querySelector('#program-params .column-params')
+  if (columnParamsElem) {
+    columnParamsElem.innerHTML = ''
+  } else {
+    columnParamsElem = document.createElement('div')
+    programParamElem.appendChild(columnParamsElem)
+  }
+
   columnParamsElem.className = 'column-params'
 
   const columnInputs = document.createElement('div')
@@ -98,7 +82,7 @@ const renderColumnParams = ({ programParamElem, program }) => {
 
     const columnInputElems = document.querySelectorAll('.column-container .column')
     columnInputElems.forEach((elem, index) => {
-      const columnActive = isColumnActive((index + 1), { delta, ...program.params, ...columnParams })
+      const columnActive = isColumnActive((index + 1), { delta, params: program.params, columnParams: columnParams })
       if (columnActive)
         elem.classList.add('active')
       else
@@ -134,11 +118,19 @@ const renderColumnParams = ({ programParamElem, program }) => {
   if (columnParams.type) columnSelect.value = columnParams.type
   columnSelect.addEventListener('input', () => {
     columnParams.type = columnSelect.value
+    renderColumnParams({ programParamElem, program })
   })
   columnParamsElem.appendChild(columnSelect)
 
   columnParamsElem.appendChild(columnInputs)
-  programParamElem.appendChild(columnParamsElem)
+
+  if (columnParams.type !== 'manual' && columnFns[columnParams.type].renderParams) {
+    columnFns[columnParams.type].renderParams({
+      parent: columnParamsElem,
+      columnParams,
+      title: program.title
+    })
+  }
 }
 
 module.exports = {
