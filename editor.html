@@ -8,32 +8,34 @@
   </head>
   <body>
     <main>
-      <section id='top-section'>
+      <section id='left-section'>
+        <section id='timeline-section'>
+          <section id='timeline-controls'>
+            <progress id='progress' value='0' max='100'></progress>
+            <button id='loadMidi'>Load Midi</button>
+            <button id='loadProgram'>Import Program</button>
+            <button id='loadAudio'>Load Audio</button>
+            <button id='play'>Play</button>
+            <button id='export'>Export</button>
+            <button id='save'>Save JSON</button>
+            <button id='loadJSON'>Load JSON</button>
+            <button id='setTempo'>Set Tempo</button>
+            <div id='tempo'></div>
+            <div id='division'></div>
+          </section>
+          <section id='timeline-container'>
+            <section id='timeline'></section>
+          </section>
+        </section>
+        <section id='program-section'>
+          <section id='program-list'></section>
+          <section id='program-params'></section>
+          <section id='program-preview'><canvas id='preview'></canvas></section>
+        </section>
+      </section>
+      <section id='right-section'>
         <div id='clipboard'></div>
         <div id='compositions'></div>
-      </section>
-      <section id='timeline-section'>
-        <section id='timeline-controls'>
-          <progress id='progress' value='0' max='100'></progress>
-          <button id='loadMidi'>Load Midi</button>
-          <button id='loadProgram'>Import Program</button>
-          <button id='loadAudio'>Load Audio</button>
-          <button id='play'>Play</button>
-          <button id='export'>Export</button>
-          <button id='save'>Save JSON</button>
-          <button id='loadJSON'>Load JSON</button>
-          <button id='setTempo'>Set Tempo</button>
-          <div id='tempo'></div>
-          <div id='division'></div>
-        </section>
-        <section id='timeline-container'>
-          <section id='timeline'></section>
-        </section>
-      </section>
-      <section id='program-section'>
-        <section id='program-list'></section>
-        <section id='program-params'></section>
-        <section id='program-preview'><canvas id='preview'></canvas></section>
       </section>
     </main>
     <script>
