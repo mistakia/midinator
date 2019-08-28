@@ -24,7 +24,7 @@ const columnWidth = config.videoWidth / config.totalColumns
 const progressElem = document.getElementById('progress')
 const timeline = document.getElementById('timeline')
 const canvas = document.createElement('canvas')
-const ctx = canvas.getContext('2d', { alpha: false })
+const ctx = canvas.getContext('2d')
 canvas.width = config.videoWidth
 canvas.height = config.videoHeight
 
