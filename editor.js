@@ -282,6 +282,10 @@ const save = () => {
       const Project = getProject()
       jsonfile.writeFileSync(file, Project)
       localStorage.setItem('projectFile', file)
+
+      const projects = localStorage.getItem('projects') || []
+      projects.push(file)
+      localStorage.setItem('projects', projects)
     }
   })
 }
@@ -362,12 +366,13 @@ const setTempo = () => {
 }
 
 document.querySelector('#play').addEventListener('click', play)
-document.querySelector('#loadMidi').addEventListener('click', loadMidiFile)
-document.querySelector('#loadJSON').addEventListener('click', loadJSON)
-document.querySelector('#save').addEventListener('click', save)
-document.querySelector('#export').addEventListener('click', showExportDialog)
 document.querySelector('#loadProgram').addEventListener('click', showProgramDialog)
 document.querySelector('#loadAudio').addEventListener('click', loadAudio)
 document.querySelector('#setTempo').addEventListener('click', setTempo)
+
+ipc.on('new', loadMidiFile)
+ipc.on('open', loadJSON)
+ipc.on('export', showExportDialog)
+ipc.on('save', save)
 
 init()

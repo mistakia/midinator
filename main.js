@@ -1,5 +1,6 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, ipcMain } = require('electron')
+const defaultMenu = require('electron-default-menu')
+const { app, BrowserWindow, ipcMain, Menu, shell } = require('electron')
 const config = require('./config')
 
 const isDevelopment = process.env.NODE_ENV === 'development'
@@ -14,6 +15,53 @@ function createWindows () {
   createEditorWindow()
   createRenderWindow()
   createVideoWindow()
+
+  const menu = defaultMenu(app, shell)
+
+  menu.splice(1, 0, {
+    label: 'File',
+    submenu: [{
+      label: 'New Project',
+      accelerator: 'CmdOrCtrl+N',
+      click: () => {
+        editorWindow && editorWindow.webContents.send('new')
+      }
+    }, {
+      label: 'Open Project',
+      accelerator: 'CmdOrCtrl+O',
+      click: () => {
+        editorWindow && editorWindow.webContents.send('open')
+      }
+    }, {
+      type: 'separator'
+    }, {
+      label: 'Save Project',
+      accelerator: 'CmdOrCtrl+S',
+      click: () => {
+        editorWindow && editorWindow.webContents.send('save')
+      }
+    }, {
+      type: 'separator'
+    }, {
+      label: 'Export Video',
+      accelerator: 'CmdOrCtrl+E',
+      click: () => {
+        editorWindow && editorWindow.webContents.send('export')
+      }
+    }]
+  })
+
+  menu.splice(2, 1, {
+    label: 'Edit',
+    submenu: [{
+      label: 'New Midi Note',
+      accelerator: 'CmdOrCtrl+M',
+      click: () => {
+        editorWindow && editorWindow.webContents.send('midi')
+      }
+    }]
+  })
+  Menu.setApplicationMenu(Menu.buildFromTemplate(menu));
 }
 
 function createVideoWindow () {
