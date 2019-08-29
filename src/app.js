@@ -1,7 +1,7 @@
 const eases = require('d3-ease')
 const Pickr = require('@simonwep/pickr')
-const hotkeys = require('hotkeys-js')
 const prompt = require('electron-prompt')
+const ipc = require('electron').ipcRenderer
 
 const Programs = require('./programs')
 const {
@@ -510,8 +510,7 @@ const setPosition = (measure = selectedMeasure) => {
   selectedMeasure = measure
 }
 
-hotkeys('n', function(event, handler){
-  event.preventDefault()
+const addMidiNote = () => {
   prompt({
     title: 'Create midi note',
     label: 'tick #',
@@ -539,8 +538,9 @@ hotkeys('n', function(event, handler){
       drawNote(midiEvent)
     }
   }).catch(console.error)
-})
+}
 
+ipc.on('midi', addMidiNote)
 
 module.exports = {
   renderApp,
