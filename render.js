@@ -42,7 +42,8 @@ function setup () {
     const zValue = Math.round(z * colSpacing)
 
     materials[i] = new THREE.MeshBasicMaterial({ map: defaultTexture })
-    const object = new THREE.Mesh( geometry, [
+    materials[i].transparent = true
+    const transparentObject = new THREE.Mesh( geometry, [
       materials[i], // Left side
       materials[i], // Right side
       defaultMaterial, // Top side
@@ -50,8 +51,12 @@ function setup () {
       materials[i], // Front side
       materials[i] // Back side
     ])
-    object.position.set(xValue, 0, zValue)
-    scene.add(object)
+    transparentObject.position.set(xValue, 0, zValue)
+    scene.add(transparentObject)
+
+    const regularObject = new THREE.Mesh( geometry, defaultMaterial)
+    regularObject.position.set(xValue, 0, zValue)scene.add(regularObject)
+    scene.add(regularObject)
   }
 
   document.body.appendChild(renderer.domElement)
