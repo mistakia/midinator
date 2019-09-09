@@ -1,6 +1,6 @@
 // Modules to control application life and create native browser window
 const defaultMenu = require('electron-default-menu')
-const { app, BrowserWindow, ipcMain, Menu, shell } = require('electron')
+const { app, BrowserWindow, ipcMain, Menu, shell, dialog } = require('electron')
 const config = require('./config')
 
 const isDevelopment = process.env.NODE_ENV === 'development'
@@ -114,6 +114,23 @@ function createEditorWindow () {
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
     editorWindow = null
+  })
+
+  editorWindow.on('close', (e) => {
+    if (!app.hideExitPrompt) {
+      e.preventDefault() // Prevents the window from closing
+      dialog.showMessageBox({
+        type: 'question',
+        buttons: ['Yes', 'No'],
+        title: 'Confirm',
+        message: 'Unsaved data will be lost. Are you sure you want to quit?'
+      }, function (response) {
+        if (response === 0) { // Runs the following if 'Yes' is clicked
+          app.hideExitPrompt = true
+          editorWindow.close()
+        }
+      })
+    }
   })
 }
 
