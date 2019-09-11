@@ -73,6 +73,19 @@ const renderClearPrograms = ({ parent }) => {
   parent.appendChild(clearProgramsElem)
 }
 
+const importSelectedClipboard = () => {
+  let selectedNotes = getSelectedNotes()
+  const cp = getClipboardPrograms()
+  selectedNotes.forEach((note) => {
+    note.programs = note.programs.concat(cp)
+    if (note.programs.length) {
+      const elem = getNoteElem(note.tick)
+      elem.classList.add('not-empty')
+    }
+  })
+  drawProgramList({ programs: selectedNotes[0].programs })
+}
+
 const drawProgramList = ({ programs, mismatch }) => {
   let selectedNotes = getSelectedNotes()
   programParamElem.innerHTML = ''
@@ -318,17 +331,7 @@ const drawProgramList = ({ programs, mismatch }) => {
     importElem.id = 'import-clipboard'
     importElem.className = 'program-item'
     importElem.innerHTML = 'Import From Clipboard'
-    importElem.addEventListener('click', () => {
-      const cp = getClipboardPrograms()
-      selectedNotes.forEach((note) => {
-        note.programs = note.programs.concat(cp)
-        if (note.programs.length) {
-          const elem = getNoteElem(note.tick)
-          elem.classList.add('not-empty')
-        }
-      })
-      drawProgramList({ programs: selectedNotes[0].programs })
-    })
+    importElem.addEventListener('click', importSelectedClipboard)
     programListElem.appendChild(importElem)
   }
 
@@ -553,5 +556,6 @@ ipc.on('midi', addMidiNote)
 
 module.exports = {
   renderApp,
-  setPosition
+  setPosition,
+  importSelectedClipboard
 }

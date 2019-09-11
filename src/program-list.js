@@ -1,7 +1,15 @@
 class ProgramList {
   constructor(list) {
     this.list = list || []
-    this.selectedIndex = 0
+    this._selectedIndex = 0
+  }
+
+  get selectedIndex () {
+    return this._selectedIndex
+  }
+
+  set selectedIndex (idx) {
+    this._selectedIndex = idx
   }
 
   add (v) {
@@ -16,12 +24,12 @@ class ProgramList {
     return this.list.length
   }
 
-  getSelected() {
-    return this.list[this.selectedIndex].programs
+  has (idx) {
+    return !!this.list[idx]
   }
 
-  setSelected(idx) {
-    this.selectedIndex = idx
+  getSelected() {
+    return this.list[this._selectedIndex].programs
   }
 }
 

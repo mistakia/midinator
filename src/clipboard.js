@@ -5,6 +5,21 @@ const clipboard = new ProgramList()
 
 const haveClipboard = () => (clipboard.length)
 
+const getSelectedIndex = () => {
+  return clipboard.selectedIndex
+}
+
+const setSelectedIndex = (idx) => {
+  if (!clipboard.has(idx)) {
+    return
+  }
+
+  clipboard.selectedIndex = idx
+  resetClassName('program-item', '#clipboard .program-item')
+  const elem = document.querySelector(`#clipboard .program-item:nth-child(${idx + 1})`)
+  elem.classList.add('selected')
+}
+
 const getClipboardPrograms = () => {
   return JSON.parse(JSON.stringify(clipboard.getSelected()))
 }
@@ -50,7 +65,7 @@ const renderClipboard = () => {
     }
     clipboardItemElem.appendChild(nameInput)
     clipboardItemElem.addEventListener('click', () => {
-      clipboard.setSelected(idx)
+      clipboard.selectedIndex = idx
       resetClassName('program-item', '#clipboard .program-item')
       clipboardItemElem.classList.add('selected')
     })
@@ -60,6 +75,8 @@ const renderClipboard = () => {
 
 module.exports = {
   addToClipboard,
+  getSelectedIndex,
+  setSelectedIndex,
   getClipboardPrograms,
   haveClipboard,
   renderClipboard
