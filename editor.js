@@ -20,6 +20,8 @@ const { getProject, setProject } = require('./src/project')
 const { getMidiEvent } = require('./src/utils')
 let Audio = require('./src/audio')
 
+require('./src/shortcuts')
+
 const columnWidth = config.videoWidth / config.totalColumns
 const progressElem = document.getElementById('progress')
 const timeline = document.getElementById('timeline')
