@@ -181,6 +181,15 @@ progress[value]::-webkit-progress-value {
     content: attr(data-tick);
 }
 
+.note:not(.active):hover:before {
+    position: absolute;
+    font-size: 12px;
+    color: red;
+    bottom: -18px;
+    left: 0;
+    content: attr(data-diff);
+}
+
 #program-list {
     flex: 1 0 auto;
     position: relative;

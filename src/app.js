@@ -389,6 +389,15 @@ const drawNote = (midiEvent) => {
   elem.setAttribute('style', `left: ${position}%;`)
   elem.dataset.tick = midiEvent.tick
   elem.addEventListener('click', loadNote)
+  elem.addEventListener('mouseover', () => {
+    let selectedNotes = getSelectedNotes()
+    if (selectedNotes.length !== 1) {
+      return
+    }
+    const { tick } = selectedNotes[0]
+    const diff = midiEvent.tick - tick
+    elem.dataset.diff = diff
+  })
   parent.appendChild(elem)
 }
 
