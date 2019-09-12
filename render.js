@@ -55,7 +55,8 @@ function setup () {
     scene.add(transparentObject)
 
     const regularObject = new THREE.Mesh( geometry, defaultMaterial)
-    regularObject.position.set(xValue, 0, zValue)scene.add(regularObject)
+    regularObject.position.set(xValue, 0, zValue)
+    scene.add(regularObject)
     scene.add(regularObject)
   }
 
