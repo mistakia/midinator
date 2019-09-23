@@ -546,7 +546,8 @@ const addMidiNote = () => {
         track: 1,
         velocity: 100,
       }
-      Project.midiEvents.push(midiEvent)
+      const insertIndex = Project.midiEvents.findIndex(e => e.tick >= tick) || 1
+      Project.midiEvents.splice(insertIndex - 1, 0, midiEvent)
       drawNote(midiEvent)
     }
   }).catch(console.error)
