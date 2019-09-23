@@ -125,6 +125,13 @@ const renderColumnParams = ({ programParamElem, program }) => {
     columnInputs.appendChild(columnInput)
   }
 
+  const clearColumnsButton = document.createElement('button')
+  clearColumnsButton.innerText = 'Clear'
+  clearColumnsButton.addEventListener('click', () => {
+    columnParams.manualSelections = {}
+  })
+  clearColumnsButton.disabled = columnParams.type !== 'manual'
+
   const columnSelect = document.createElement('select')
   Object.keys(columnFns).forEach((type) => {
     const option = document.createElement('option')
@@ -134,10 +141,12 @@ const renderColumnParams = ({ programParamElem, program }) => {
   if (columnParams.type) columnSelect.value = columnParams.type
   columnSelect.addEventListener('input', () => {
     columnParams.type = columnSelect.value
+    clearColumnsButton.disabled = columnParams.type !== 'manual'
   })
   columnParamsElem.appendChild(columnSelect)
 
   columnParamsElem.appendChild(columnInputs)
+  columnParamsElem.appendChild(clearColumnsButton)
   programParamElem.appendChild(columnParamsElem)
 }
 
