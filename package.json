@@ -8,7 +8,7 @@
     "start:watch": "NODE_ENV=development nodemon --watch 'main.js' --watch 'renderer.js' --watch 'config.js' --watch './src/**/*.js' --watch *.html --watch *.css --exec 'electron .'"
   },
   "devDependencies": {
-    "electron": "^4.1.1",
+    "electron": "^18.3.7",
     "nodemon": "^1.18.10"
   },
   "dependencies": {
